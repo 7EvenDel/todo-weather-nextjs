@@ -1,9 +1,6 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
-// const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-// const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-
 // const authOptions: NextAuthOptions = {
 //   session: {
 //     strategy: "jwt",
@@ -33,11 +30,8 @@ import GoogleProvider from "next-auth/providers/google";
 const handler = NextAuth({
   providers: [
     GoogleProvider({
-      //   clientId: process.env.GOOGLE_CLIENT_ID,
-      //   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      clientId:
-        "159123240315-u2m9r3lgcdncaohhhbebb87bmp4ltmps.apps.googleusercontent.com",
-      clientSecret: "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",
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   ],
 });
