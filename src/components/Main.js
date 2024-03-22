@@ -1,10 +1,16 @@
 "use client";
 
+import History from "./History";
+import MyTasks from "./MyTasks";
+import Weather from "./Weather";
+
 const Main = () => {
   return (
-    <section className="flex flex-col items-center p-24 bg-cover">
-      Content that signed in user can see
-    </section>
+    <div className="container">
+      <History />
+      <MyTasks />
+      <Weather />
+    </div>
   );
 };
 

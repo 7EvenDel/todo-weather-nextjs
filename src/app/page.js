@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <>
       <Header />
-      <main className="flex h-[857px] flex-col items-center bg-[url('/main-backdrop.png')] bg-cover">
+      <main className="flex min-h-[857px] flex-col bg-[url('/main-backdrop.png')] bg-fixed">
         {content}
       </main>
     </>

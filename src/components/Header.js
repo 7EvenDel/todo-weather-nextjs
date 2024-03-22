@@ -48,17 +48,28 @@ const Header = () => {
       <div className="container flex justify-between items-center">
         <Link
           href="/"
-          className="flex flex-col w-20 items-center hover:opacity-80 cursor-pointer transition duration-300"
+          className="flex flex-col w-20 items-center hover:opacity-50 cursor-pointer transition duration-200"
         >
           <Image src="/logo.jpg" alt="logo" width={50} height={50} />
           <Label>ToDoWeath</Label>
         </Link>
+        <div className="w-full flex justify-end gap-4 mt-2 px-32">
+          <Button variant="ghost" className="font-bold">
+            History
+          </Button>
+          <Button variant="ghost" className="">
+            My Tasks
+          </Button>
+          <Button variant="ghost" className="">
+            Weather
+          </Button>
+        </div>
         <Dialog>
           <DialogTrigger asChild className="mt-2 relative size-12">
             <img
               src={userprofile.image}
               alt="user"
-              className="size-12 rounded-full cursor-pointer hover-opacity-0"
+              className="size-12 rounded-full hover:opacity-50 cursor-pointer transition duration-200"
             />
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
