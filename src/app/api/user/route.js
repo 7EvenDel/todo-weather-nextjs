@@ -8,7 +8,7 @@ export async function GET() {
     );
     await client.connect();
     const result = await client
-      .db("sample_mflix")
+      .db("todo-weather")
       .collection("users")
       .find({})
       .toArray();
@@ -35,8 +35,19 @@ export async function POST(request) {
 
   try {
     await client.connect();
-    await client.db("sample_mflix").collection("users").insertOne(data);
-    return new NextResponse("User data successfully sent to DB");
+    const similarUser = await client
+      .db("todo-weather")
+      .collection("users")
+      .findOne({ email: data.email });
+    if (!similarUser) {
+      console.log(similarUser, "added");
+      await client.db("todo-weather").collection("users").insertOne(data);
+      return new NextResponse("User data successfully sent to DB");
+    } else {
+      console.log(similarUser, "did not added");
+
+      return new Error("User with this email is already exists");
+    }
   } finally {
     await client.close();
   }

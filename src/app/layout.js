@@ -1,6 +1,7 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
+import Header from "@/components/Header";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -12,9 +13,15 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body
+        className={
+          "flex min-h-[857px] flex-col bg-[url('/main-backdrop.png')] bg-fixed" +
+          inter.className
+        }
+      >
         <Providers>
-          {children} 
+          <Header />
+          <div className="container">{children}</div>
         </Providers>
       </body>
     </html>

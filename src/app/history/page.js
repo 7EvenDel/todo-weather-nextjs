@@ -1,10 +1,12 @@
+'use client'
+
 import {
   BriefcaseBusiness,
   Home,
   GraduationCap,
   CalendarCheck,
 } from "lucide-react";
-import { Badge } from "./ui/badge";
+import { Badge } from "../../components/ui/badge";
 
 const historyTasks = [
   {
@@ -57,7 +59,6 @@ const historyTasks = [
     description:
       "Description of the task Description of the task Description of the task Description of the task",
   },
-
 ];
 
 const History = () => {
@@ -82,7 +83,7 @@ const History = () => {
                   Started: <span className="text-black">{el.dateStart}</span>
                 </p>
                 <p className="text-gray-400">
-                  Finished: <span className="text-black">{el.dateFinish}</span>
+                  Finished: <span className="text-  black">{el.dateFinish}</span>
                 </p>
               </div>
               <div className="w-20 h-full text-left flex flex-col justify-center gap-2">

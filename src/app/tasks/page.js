@@ -1,8 +1,9 @@
+"use client";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "./ui/button";
 import { useState } from "react";
 import { Thermometer } from "lucide-react";
-import { Separator } from "./ui/separator";
+import { Separator } from "../../components/ui/separator";
 
 const MyTasks = () => {
   const [category, setCategory] = useState("Personal");
