@@ -2,6 +2,7 @@ import NextAuth, { User } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import AppleProvider from "next-auth/providers/apple";
 import Credentials from "next-auth/providers/credentials";
+import { MongoClient } from "mongodb";
 
 const users = [
   { name: "admin name", email: "admin@gmail.com", password: "admin" },
@@ -27,17 +28,23 @@ const handler = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials.password) return null;
-
-        const currentUser = users.find(
-          (user) => user.email === credentials.email
+        const client = new MongoClient(
+          "mongodb+srv://ovsiichukbohdan:GMR5ic8rEJq63zEQ@todo-weather-db.gjm3nt1.mongodb.net/"
         );
+        await client.connect();
+        const currentUser = await client
+          .db("todo-weather")
+          .collection("users")
+          .find({ email: credentials.email, password: credentials.password })
+          .toArray();
+        await client.close();
 
-        if (currentUser && currentUser.password === credentials.password) {
-          const { password, ...userWithoutPass } = currentUser;
-          return userWithoutPass;
+        if (currentUser.length === 1) {
+          const { password, _id, ...userWithoutPassAndId } = currentUser[0];
+          return userWithoutPassAndId;
         }
 
-        return user;
+        return null;
       },
     }),
   ],

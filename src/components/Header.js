@@ -192,7 +192,9 @@ const Header = () => {
             </Select>
             <DialogFooter className="flex w-full justify-between">
               <DialogClose>
-                <Button type="submit">Save changes</Button>
+                <Button type="submit" onClick={() => console.log(session)}>
+                  Save changes
+                </Button>
               </DialogClose>
               <DialogClose>
                 <Button

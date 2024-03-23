@@ -21,7 +21,7 @@ const Auth = () => {
         email: z.string().min(1, { message: "You forgot to enter your email" }),
         password: z
           .string()
-          .min(6, { message: "Password must contain at least 6 characters" }),
+          .min(4, { message: "Password must contain at least 6 characters" }),
       })
     : z.object({
         firstname: z.string().min(1, { message: "Enter your first name" }),
@@ -29,7 +29,7 @@ const Auth = () => {
         email: z.string().min(1, { message: "You forgot to enter your email" }),
         password: z
           .string()
-          .min(6, { message: "Password must contain at least 6 characters" }),
+          .min(4, { message: "Password must contain at least 6 characters" }),
       });
 
   const {
@@ -43,7 +43,13 @@ const Auth = () => {
   const onSubmit = async (data) => {
     // setSending(true);
     console.log(data);
-
+    const res = await signIn("credentials", { ...data, redirect: false });
+    if (res && !res.error) {
+      // router.push('/')
+      console.log("authorized successfully");
+    } else {
+      console.log("auth error");
+    }
     // try {
     //   const res = await fetch("http://localhost:3000/api/auth", {
     //     method: "POST",
