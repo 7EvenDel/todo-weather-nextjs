@@ -208,7 +208,7 @@ const Auth = () => {
             type="button"
             variant="ghost"
             disabled={sending}
-            onClick={() => signIn()}
+            onClick={() => signIn("google")}
             className={
               sending
                 ? "flex border border-black w-full h-16 flex items-center justify-center flex h-[49px] text-[16px] mb-4"
