@@ -7,9 +7,9 @@ import Weather from "./Weather";
 const Main = () => {
   return (
     <div className="container">
-      <History />
+      {/* <History /> */}
       <MyTasks />
-      <Weather />
+      {/* <Weather /> */}
     </div>
   );
 };
