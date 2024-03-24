@@ -2,8 +2,17 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
-import { Thermometer } from "lucide-react";
+import {
+  Check,
+  CircleCheck,
+  CircleDashed,
+  CloudRain,
+  StickyNote,
+  Thermometer,
+  Trash2,
+} from "lucide-react";
 import { Separator } from "../../components/ui/separator";
+import { Button } from "@/components/ui/button";
 
 const MyTasks = () => {
   const [category, setCategory] = useState("Personal");
@@ -80,15 +89,146 @@ const Day = () => {
       <Separator className="my-2" />
       <div className="flex justify-between">
         <div className="w-80">
-          <p className="p-4 bg-gray-50 rounded-xl drop-shadow w-full">ToDo</p>
-        </div>
-        <div className="w-80">
-          <p className="p-4 bg-gray-50 rounded-xl drop-shadow w-full">
-            In progress
+          <p className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold">
+            <StickyNote className="size-4 mr-2 text-blue-500" /> ToDo
           </p>
+          <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
+            <div className="flex justify-between">
+              <h3 className="font-semibold">Task title</h3>
+              <p className="text-gray-500 text-sm">07:09 - 08:23</p>
+            </div>
+            <div className="flex justify-between ">
+              <p className="w-56 text-sm">
+                Task description Task description Task description
+              </p>
+              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+              <p className="text-gray-500 h-10 text-sm flex items-center">
+                +12°
+              </p>
+            </div>
+            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+              <Button variant="" className="bg-green-600 shadow" size="icon">
+                <Check className="size-6 " />
+              </Button>
+              <Button
+                variant="secondary"
+                className="bg-yellow-500 shadow"
+                size="icon"
+              >
+                <CircleDashed className="size-6 text-white" />
+              </Button>
+              <Button variant="destructive" className="shadow" size="icon">
+                <Trash2 className="size-6 " />
+              </Button>
+            </div>
+          </div>
         </div>
         <div className="w-80">
-          <p className="p-4 bg-gray-50 rounded-xl drop-shadow w-full">Done</p>
+          <p className="p-4 flex bg-gray-50 items-center rounded-xl drop-shadow w-full mb-4 font-semibold">
+            <CircleDashed className="size-4 mr-2 text-yellow-500" /> In progress
+          </p>
+          <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
+            <div className="flex justify-between">
+              <h3 className="font-semibold">Task title</h3>
+              <p className="text-gray-500 text-sm">07:09 - 08:23</p>
+            </div>
+            <div className="flex justify-between ">
+              <p className="w-56 text-sm">
+                Task description Task description Task description Task
+                description Task description
+              </p>
+              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+              <p className="text-gray-500 h-10 text-sm flex items-center">
+                +12°
+              </p>
+            </div>
+            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+              <Button variant="" className="bg-green-600 shadow" size="icon">
+                <Check className="size-6 " />
+              </Button>
+              <Button
+                variant="secondary"
+                className="bg-yellow-500 shadow"
+                size="icon"
+                disabled
+              >
+                <CircleDashed className="size-6 text-white" disa />
+              </Button>
+              <Button variant="destructive" className="shadow" size="icon">
+                <Trash2 className="size-6 " />
+              </Button>
+            </div>
+          </div>
+          <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
+            <div className="flex justify-between">
+              <h3 className="font-semibold">Task title</h3>
+              <p className="text-gray-500 text-sm">07:09 - 08:23</p>
+            </div>
+            <div className="flex justify-between ">
+              <p className="w-56 text-sm">
+                Task description Task description Task description Task
+                description Task description
+              </p>
+              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+              <p className="text-gray-500 h-10 text-sm flex items-center">
+                +12°
+              </p>
+            </div>
+            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+              <Button variant="" className="bg-green-600 shadow" size="icon">
+                <Check className="size-6 " />
+              </Button>
+              <Button
+                variant="secondary"
+                className="bg-yellow-500 shadow"
+                size="icon"
+                disabled
+              >
+                <CircleDashed className="size-6 text-white" disa />
+              </Button>
+              <Button variant="destructive" className="shadow" size="icon">
+                <Trash2 className="size-6 " />
+              </Button>
+            </div>
+          </div>
+        </div>
+        <div className="w-80">
+          <p className="p-4 bg-gray-50 rounded-xl drop-shadow items-center flex w-full mb-4 font-semibold">
+            <CircleCheck className="size-4 mr-2 text-green-500" /> Done
+          </p>
+          <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
+            <div className="flex justify-between">
+              <h3 className="font-semibold">Task title</h3>
+              <p className="text-gray-500 text-sm">07:09 - 08:23</p>
+            </div>
+            <div className="flex justify-between ">
+              <p className="w-56 text-sm">Task description</p>
+              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+              <p className="text-gray-500 h-10 text-sm flex items-center">
+                +12°
+              </p>
+            </div>
+            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+              <Button
+                variant=""
+                className="bg-green-600 shadow"
+                size="icon"
+                disabled
+              >
+                <Check className="size-6 " />
+              </Button>
+              <Button
+                variant="secondary"
+                className="bg-yellow-500 shadow"
+                size="icon"
+              >
+                <CircleDashed className="size-6 text-white" />
+              </Button>
+              <Button variant="destructive" className="shadow" size="icon">
+                <Trash2 className="size-6 " />
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

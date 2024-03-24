@@ -17,10 +17,10 @@ const handler = NextAuth({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
-    AppleProvider({
-      clientId: process.env.APPLE_ID,
-      clientSecret: process.env.APPLE_SECRET,
-    }),
+    // AppleProvider({
+    //   clientId: process.env.APPLE_ID,
+    //   clientSecret: process.env.APPLE_SECRET,
+    // }),
     Credentials({
       credentials: {
         email: { label: "email", type: "email", required: true },

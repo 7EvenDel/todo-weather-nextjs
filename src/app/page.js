@@ -1,13 +1,24 @@
-import Header from "@/components/Header";
-import Auth from "@/app/auth/page";
-import Main from "@/components/Main";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import Image from "next/image";
 
 export default function Home() {
-  // const content = session && session.user ? <Main /> : <Auth />;
+  const router = useRouter();
+  useEffect(() => {
+    router.push("/weather");
+  }, []);
   return (
     <>
       <main className="flex min-h-[857px] flex-col bg-[url('/main-backdrop.png')] bg-fixed">
-        {/* {content} */}Main
+        <Image
+          className="mx-auto mt-40"
+          src="/Gear-0.2s-200px.gif"
+          width={200}
+          height={200}
+          alt="Loading..."
+        />
       </main>
     </>
   );

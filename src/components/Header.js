@@ -42,7 +42,7 @@ const Header = () => {
     <header className="bg-white drop-shadow pb-2">
       <div className="container flex justify-between items-center">
         <Link
-          href="/"
+          href="/weather"
           className="flex flex-col w-20 items-center hover:opacity-50 cursor-pointer transition duration-200 "
         >
           <Image src="/logo.jpg" alt="logo" width={50} height={50} />
@@ -90,7 +90,7 @@ const Header = () => {
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
-                  Edit profile{" "}
+                  Edit profile
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
