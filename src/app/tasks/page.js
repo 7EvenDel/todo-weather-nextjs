@@ -1,8 +1,10 @@
 "use client";
 
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 import {
+  Calendar,
   Check,
   CircleCheck,
   CircleDashed,
@@ -16,6 +18,13 @@ import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
+import { toast } from "sonner";
+
+const categories = [
+  { label: "Personal", value: "personal" },
+  { label: "Work", value: "work" },
+  { label: "Study", value: "study" },
+];
 
 const MyTasks = () => {
   const [category, setCategory] = useState("Personal");
@@ -61,32 +70,41 @@ const MyTasks = () => {
           <div className="mt-64 pt-2">
             <TabsTrigger
               value="day"
-              className="text-[14px] mt-2 ml-4 w-36 h-12"
+              className="text-[14px] mt-2 ml-4 w-36 h-12 rounded-l-xl"
             >
               This day
             </TabsTrigger>
             <TabsTrigger
               value="week"
-              className="text-[14px] mt-2 ml-4 w-36 h-12"
+              className="text-[14px] mt-2 ml-4 w-36 h-12 rounded-l-xl"
             >
               Next week
             </TabsTrigger>
             <TabsTrigger
               value="all"
-              className="text-[14px] mt-2 ml-4 w-36 h-12"
+              className="text-[14px] mt-2 ml-4 w-36 h-12 rounded-l-xl"
             >
               All my tasks
             </TabsTrigger>
             <div className="mt-28 flex-col flex h-40 bg-gray-100 rounded-l-xl">
-              <button className="text-[14px] mb-2 text-black bg-white h-12 w-36 ml-4">
-                button
-              </button>
-              <button className="text-[14px] mb-2 h-12 w-36 ml-4">
-                button
-              </button>
-              <button className="text-[14px] mb-2 h-12 w-36 ml-4">
-                button
-              </button>
+              {categories.map((el) => {
+                return (
+                  <button
+                    key={el.value}
+                    onClick={() => {
+                      setCategory(el.value),
+                        toast.info("Current category: " + el.label);
+                    }}
+                    className={
+                      el.value === category
+                        ? "text-[14px] mb-2 h-12 w-36 ml-4 bg-white font-semibold transition duration-100 text-black shadow rounded-l-xl"
+                        : "text-[14px] mb-2 h-12 w-36 ml-4 font-semibold transition duration-100 rounded-l-xl"
+                    }
+                  >
+                    {el.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </TabsList>
@@ -141,12 +159,16 @@ const Day = () => {
               </p>
             </div>
             <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
-              <Button variant="" className="bg-green-600 shadow" size="icon">
+              <Button
+                variant=""
+                className="hover:bg-green-500 bg-green-600 shadow"
+                size="icon"
+              >
                 <Check className="size-6 " />
               </Button>
               <Button
                 variant="secondary"
-                className="bg-yellow-500 shadow"
+                className="hover:bg-yellow-400 bg-yellow-500 shadow"
                 size="icon"
               >
                 <CircleDashed className="size-6 text-white" />
@@ -177,12 +199,16 @@ const Day = () => {
               </p>
             </div>
             <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
-              <Button variant="" className="bg-green-600 shadow" size="icon">
+              <Button
+                variant=""
+                className="hover:bg-green-500 bg-green-600 shadow"
+                size="icon"
+              >
                 <Check className="size-6 " />
               </Button>
               <Button
                 variant="secondary"
-                className="bg-yellow-500 shadow"
+                className="hover:bg-yellow-400 bg-yellow-500 shadow"
                 size="icon"
                 disabled
               >
@@ -209,12 +235,16 @@ const Day = () => {
               </p>
             </div>
             <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
-              <Button variant="" className="bg-green-600 shadow" size="icon">
+              <Button
+                variant=""
+                className="hover:bg-green-500 bg-green-600 shadow"
+                size="icon"
+              >
                 <Check className="size-6 " />
               </Button>
               <Button
                 variant="secondary"
-                className="bg-yellow-500 shadow"
+                className="hover:bg-yellow-400 bg-yellow-500 shadow"
                 size="icon"
                 disabled
               >
@@ -253,7 +283,7 @@ const Day = () => {
               </Button>
               <Button
                 variant="secondary"
-                className="bg-yellow-500 shadow"
+                className="hover:bg-yellow-400 bg-yellow-500 shadow"
                 size="icon"
               >
                 <CircleDashed className="size-6 text-white" />
@@ -271,16 +301,553 @@ const Day = () => {
 
 const Week = () => {
   return (
-    <div className="bg-white w-full -mt-2 min-h-[750px] rounded-r-xl rounded-b-xl p-8">
-      next week
-    </div>
+    <ScrollArea className="bg-white -mt-2 min-h-[750px] rounded-r-xl w-[1176px] rounded-b-xl p-8">
+      <div className="flex justify-between gap-16">
+        <div className="w-80">
+          <p className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold">
+            <Calendar className="size-4 mr-2 " />
+            12.02
+          </p>
+          <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
+            <div className="flex justify-between">
+              <h3 className="font-semibold">Task title</h3>
+              <p className="text-gray-500 text-sm">07:09 - 08:23</p>
+            </div>
+            <div className="flex justify-between ">
+              <p className="w-56 text-sm">
+                Task description Task description Task description
+              </p>
+              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+              <p className="text-gray-500 h-10 text-sm flex items-center">
+                +12°
+              </p>
+            </div>
+            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+              <Button
+                variant=""
+                className="hover:bg-green-500 bg-green-600 shadow"
+                size="icon"
+              >
+                <Check className="size-6 " />
+              </Button>
+              <Button
+                variant="secondary"
+                className="hover:bg-yellow-400 bg-yellow-500 shadow"
+                size="icon"
+              >
+                <CircleDashed className="size-6 text-white" />
+              </Button>
+              <Button variant="destructive" className="shadow" size="icon">
+                <Trash2 className="size-6 " />
+              </Button>
+            </div>
+          </div>
+        </div>
+        <div className="w-80">
+          <p className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold">
+            <Calendar className="size-4 mr-2 " />
+            13.02
+          </p>
+          <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
+            <div className="flex justify-between">
+              <h3 className="font-semibold">Task title</h3>
+              <p className="text-gray-500 text-sm">07:09 - 08:23</p>
+            </div>
+            <div className="flex justify-between ">
+              <p className="w-56 text-sm">
+                Task description Task description Task description
+              </p>
+              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+              <p className="text-gray-500 h-10 text-sm flex items-center">
+                +12°
+              </p>
+            </div>
+            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+              <Button
+                variant=""
+                className="hover:bg-green-500 bg-green-600 shadow"
+                size="icon"
+              >
+                <Check className="size-6 " />
+              </Button>
+              <Button
+                variant="secondary"
+                className="hover:bg-yellow-400 bg-yellow-500 shadow"
+                size="icon"
+              >
+                <CircleDashed className="size-6 text-white" />
+              </Button>
+              <Button variant="destructive" className="shadow" size="icon">
+                <Trash2 className="size-6 " />
+              </Button>
+            </div>
+          </div>
+        </div>
+        <div className="w-80">
+          <p className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold">
+            <Calendar className="size-4 mr-2 " />
+            14.02
+          </p>
+          <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
+            <div className="flex justify-between">
+              <h3 className="font-semibold">Task title</h3>
+              <p className="text-gray-500 text-sm">07:09 - 08:23</p>
+            </div>
+            <div className="flex justify-between ">
+              <p className="w-56 text-sm">
+                Task description Task description Task description
+              </p>
+              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+              <p className="text-gray-500 h-10 text-sm flex items-center">
+                +12°
+              </p>
+            </div>
+            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+              <Button
+                variant=""
+                className="hover:bg-green-500 bg-green-600 shadow"
+                size="icon"
+              >
+                <Check className="size-6 " />
+              </Button>
+              <Button
+                variant="secondary"
+                className="hover:bg-yellow-400 bg-yellow-500 shadow"
+                size="icon"
+              >
+                <CircleDashed className="size-6 text-white" />
+              </Button>
+              <Button variant="destructive" className="shadow" size="icon">
+                <Trash2 className="size-6 " />
+              </Button>
+            </div>
+          </div>
+        </div>
+        <div className="w-80">
+          <p className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold">
+            <Calendar className="size-4 mr-2 " />
+            15.02
+          </p>
+          <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
+            <div className="flex justify-between">
+              <h3 className="font-semibold">Task title</h3>
+              <p className="text-gray-500 text-sm">07:09 - 08:23</p>
+            </div>
+            <div className="flex justify-between ">
+              <p className="w-56 text-sm">
+                Task description Task description Task description
+              </p>
+              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+              <p className="text-gray-500 h-10 text-sm flex items-center">
+                +12°
+              </p>
+            </div>
+            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+              <Button
+                variant=""
+                className="hover:bg-green-500 bg-green-600 shadow"
+                size="icon"
+              >
+                <Check className="size-6 " />
+              </Button>
+              <Button
+                variant="secondary"
+                className="hover:bg-yellow-400 bg-yellow-500 shadow"
+                size="icon"
+              >
+                <CircleDashed className="size-6 text-white" />
+              </Button>
+              <Button variant="destructive" className="shadow" size="icon">
+                <Trash2 className="size-6 " />
+              </Button>
+            </div>
+          </div>
+        </div>
+        <div className="w-80">
+          <p className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold">
+            <Calendar className="size-4 mr-2 " />
+            16.02
+          </p>
+          <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
+            <div className="flex justify-between">
+              <h3 className="font-semibold">Task title</h3>
+              <p className="text-gray-500 text-sm">07:09 - 08:23</p>
+            </div>
+            <div className="flex justify-between ">
+              <p className="w-56 text-sm">
+                Task description Task description Task description
+              </p>
+              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+              <p className="text-gray-500 h-10 text-sm flex items-center">
+                +12°
+              </p>
+            </div>
+            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+              <Button
+                variant=""
+                className="hover:bg-green-500 bg-green-600 shadow"
+                size="icon"
+              >
+                <Check className="size-6 " />
+              </Button>
+              <Button
+                variant="secondary"
+                className="hover:bg-yellow-400 bg-yellow-500 shadow"
+                size="icon"
+              >
+                <CircleDashed className="size-6 text-white" />
+              </Button>
+              <Button variant="destructive" className="shadow" size="icon">
+                <Trash2 className="size-6 " />
+              </Button>
+            </div>
+          </div>
+        </div>
+        <div className="w-80">
+          <p className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold">
+            <Calendar className="size-4 mr-2 " />
+            17.02
+          </p>
+          <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
+            <div className="flex justify-between">
+              <h3 className="font-semibold">Task title</h3>
+              <p className="text-gray-500 text-sm">07:09 - 08:23</p>
+            </div>
+            <div className="flex justify-between ">
+              <p className="w-56 text-sm">
+                Task description Task description Task description
+              </p>
+              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+              <p className="text-gray-500 h-10 text-sm flex items-center">
+                +12°
+              </p>
+            </div>
+            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+              <Button
+                variant=""
+                className="hover:bg-green-500 bg-green-600 shadow"
+                size="icon"
+              >
+                <Check className="size-6 " />
+              </Button>
+              <Button
+                variant="secondary"
+                className="hover:bg-yellow-400 bg-yellow-500 shadow"
+                size="icon"
+              >
+                <CircleDashed className="size-6 text-white" />
+              </Button>
+              <Button variant="destructive" className="shadow" size="icon">
+                <Trash2 className="size-6 " />
+              </Button>
+            </div>
+          </div>
+        </div>
+        <div className="w-80">
+          <p className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold">
+            <Calendar className="size-4 mr-2 " />
+            18.02
+          </p>
+          <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
+            <div className="flex justify-between">
+              <h3 className="font-semibold">Task title</h3>
+              <p className="text-gray-500 text-sm">07:09 - 08:23</p>
+            </div>
+            <div className="flex justify-between ">
+              <p className="w-56 text-sm">
+                Task description Task description Task description
+              </p>
+              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+              <p className="text-gray-500 h-10 text-sm flex items-center">
+                +12°
+              </p>
+            </div>
+            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+              <Button
+                variant=""
+                className="hover:bg-green-500 bg-green-600 shadow"
+                size="icon"
+              >
+                <Check className="size-6 " />
+              </Button>
+              <Button
+                variant="secondary"
+                className="hover:bg-yellow-400 bg-yellow-500 shadow"
+                size="icon"
+              >
+                <CircleDashed className="size-6 text-white" />
+              </Button>
+              <Button variant="destructive" className="shadow" size="icon">
+                <Trash2 className="size-6 " />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <ScrollBar orientation="horizontal" />
+    </ScrollArea>
   );
 };
 
 const All = () => {
   return (
-    <div className="bg-white w-full -mt-2 min-h-[750px] rounded-r-xl rounded-b-xl p-8">
-      all tasks
+    <div className="bg-white w-full flex flex-wrap justify-center -mt-2 min-h-[750px] rounded-r-xl rounded-b-xl p-8 space-x-8">
+      <div className="w-80 bg-gray-50 drop-shadow rounded-xl h-48 p-4 mb-4">
+        <div className="flex justify-between">
+          <h3 className="font-semibold">Task title</h3>
+          <p className="text-gray-500 text-sm">07:09 - 08:23</p>
+        </div>
+        <div className="flex justify-between h-20">
+          <p className="w-56 text-sm">
+            Task description Task description Task description
+          </p>
+          <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+          <p className="text-gray-500 h-10 text-sm flex items-center">+12°</p>
+        </div>
+        <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+          <Button
+            variant=""
+            className="hover:bg-green-500 bg-green-600 shadow"
+            size="icon"
+          >
+            <Check className="size-6 " />
+          </Button>
+          <Button
+            variant="secondary"
+            className="hover:bg-yellow-400 bg-yellow-500 shadow"
+            size="icon"
+          >
+            <CircleDashed className="size-6 text-white" />
+          </Button>
+          <Button variant="destructive" className="shadow" size="icon">
+            <Trash2 className="size-6 " />
+          </Button>
+        </div>
+      </div>
+      <div className="w-80 bg-gray-50 drop-shadow rounded-xl h-48 p-4 mb-4">
+        <div className="flex justify-between">
+          <h3 className="font-semibold">Task title</h3>
+          <p className="text-gray-500 text-sm">07:09 - 08:23</p>
+        </div>
+        <div className="flex justify-between h-20">
+          <p className="w-56 text-sm">
+            Task description Task description Task description
+          </p>
+          <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+          <p className="text-gray-500 h-10 text-sm flex items-center">+12°</p>
+        </div>
+        <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+          <Button
+            variant=""
+            className="hover:bg-green-500 bg-green-600 shadow"
+            size="icon"
+          >
+            <Check className="size-6 " />
+          </Button>
+          <Button
+            variant="secondary"
+            className="hover:bg-yellow-400 bg-yellow-500 shadow"
+            size="icon"
+          >
+            <CircleDashed className="size-6 text-white" />
+          </Button>
+          <Button variant="destructive" className="shadow" size="icon">
+            <Trash2 className="size-6 " />
+          </Button>
+        </div>
+      </div>
+      <div className="w-80 bg-gray-50 drop-shadow rounded-xl h-48 p-4 mb-4">
+        <div className="flex justify-between">
+          <h3 className="font-semibold">Task title</h3>
+          <p className="text-gray-500 text-sm">07:09 - 08:23</p>
+        </div>
+        <div className="flex justify-between h-20">
+          <p className="w-56 text-sm">
+            Task description Task description Task description
+          </p>
+          <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+          <p className="text-gray-500 h-10 text-sm flex items-center">+12°</p>
+        </div>
+        <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+          <Button
+            variant=""
+            className="hover:bg-green-500 bg-green-600 shadow"
+            size="icon"
+          >
+            <Check className="size-6 " />
+          </Button>
+          <Button
+            variant="secondary"
+            className="hover:bg-yellow-400 bg-yellow-500 shadow"
+            size="icon"
+          >
+            <CircleDashed className="size-6 text-white" />
+          </Button>
+          <Button variant="destructive" className="shadow" size="icon">
+            <Trash2 className="size-6 " />
+          </Button>
+        </div>
+      </div>
+      <div className="w-80 bg-gray-50 drop-shadow rounded-xl h-48 p-4 mb-4">
+        <div className="flex justify-between">
+          <h3 className="font-semibold">Task title</h3>
+          <p className="text-gray-500 text-sm">07:09 - 08:23</p>
+        </div>
+        <div className="flex justify-between h-20">
+          <p className="w-56 text-sm">
+            Task description Task description Task description
+          </p>
+          <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+          <p className="text-gray-500 h-10 text-sm flex items-center">+12°</p>
+        </div>
+        <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+          <Button
+            variant=""
+            className="hover:bg-green-500 bg-green-600 shadow"
+            size="icon"
+          >
+            <Check className="size-6 " />
+          </Button>
+          <Button
+            variant="secondary"
+            className="hover:bg-yellow-400 bg-yellow-500 shadow"
+            size="icon"
+          >
+            <CircleDashed className="size-6 text-white" />
+          </Button>
+          <Button variant="destructive" className="shadow" size="icon">
+            <Trash2 className="size-6 " />
+          </Button>
+        </div>
+      </div>
+      <div className="w-80 bg-gray-50 drop-shadow rounded-xl h-48 p-4 mb-4">
+        <div className="flex justify-between">
+          <h3 className="font-semibold">Task title</h3>
+          <p className="text-gray-500 text-sm">07:09 - 08:23</p>
+        </div>
+        <div className="flex justify-between h-20">
+          <p className="w-56 text-sm">
+            Task description Task description Task description
+          </p>
+          <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+          <p className="text-gray-500 h-10 text-sm flex items-center">+12°</p>
+        </div>
+        <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+          <Button
+            variant=""
+            className="hover:bg-green-500 bg-green-600 shadow"
+            size="icon"
+          >
+            <Check className="size-6 " />
+          </Button>
+          <Button
+            variant="secondary"
+            className="hover:bg-yellow-400 bg-yellow-500 shadow"
+            size="icon"
+          >
+            <CircleDashed className="size-6 text-white" />
+          </Button>
+          <Button variant="destructive" className="shadow" size="icon">
+            <Trash2 className="size-6 " />
+          </Button>
+        </div>
+      </div>
+      <div className="w-80 bg-gray-50 drop-shadow rounded-xl h-48 p-4 mb-4">
+        <div className="flex justify-between">
+          <h3 className="font-semibold">Task title</h3>
+          <p className="text-gray-500 text-sm">07:09 - 08:23</p>
+        </div>
+        <div className="flex justify-between h-20">
+          <p className="w-56 text-sm">
+            Task description Task description Task description
+          </p>
+          <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+          <p className="text-gray-500 h-10 text-sm flex items-center">+12°</p>
+        </div>
+        <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+          <Button
+            variant=""
+            className="hover:bg-green-500 bg-green-600 shadow"
+            size="icon"
+          >
+            <Check className="size-6 " />
+          </Button>
+          <Button
+            variant="secondary"
+            className="hover:bg-yellow-400 bg-yellow-500 shadow"
+            size="icon"
+          >
+            <CircleDashed className="size-6 text-white" />
+          </Button>
+          <Button variant="destructive" className="shadow" size="icon">
+            <Trash2 className="size-6 " />
+          </Button>
+        </div>
+      </div>
+      <div className="w-80 bg-gray-50 drop-shadow rounded-xl h-48 p-4 mb-4">
+        <div className="flex justify-between">
+          <h3 className="font-semibold">Task title</h3>
+          <p className="text-gray-500 text-sm">07:09 - 08:23</p>
+        </div>
+        <div className="flex justify-between h-20">
+          <p className="w-56 text-sm">
+            Task description Task description Task description
+          </p>
+          <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+          <p className="text-gray-500 h-10 text-sm flex items-center">+12°</p>
+        </div>
+        <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+          <Button
+            variant=""
+            className="hover:bg-green-500 bg-green-600 shadow"
+            size="icon"
+          >
+            <Check className="size-6 " />
+          </Button>
+          <Button
+            variant="secondary"
+            className="hover:bg-yellow-400 bg-yellow-500 shadow"
+            size="icon"
+          >
+            <CircleDashed className="size-6 text-white" />
+          </Button>
+          <Button variant="destructive" className="shadow" size="icon">
+            <Trash2 className="size-6 " />
+          </Button>
+        </div>
+      </div>
+      <div className="w-80 bg-gray-50 drop-shadow rounded-xl h-48 p-4 mb-4">
+        <div className="flex justify-between">
+          <h3 className="font-semibold">Task title</h3>
+          <p className="text-gray-500 text-sm">07:09 - 08:23</p>
+        </div>
+        <div className="flex justify-between h-20">
+          <p className="w-56 text-sm">
+            Task description Task description Task description
+          </p>
+          <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+          <p className="text-gray-500 h-10 text-sm flex items-center">+12°</p>
+        </div>
+        <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+          <Button
+            variant=""
+            className="hover:bg-green-500 bg-green-600 shadow"
+            size="icon"
+          >
+            <Check className="size-6 " />
+          </Button>
+          <Button
+            variant="secondary"
+            className="hover:bg-yellow-400 bg-yellow-500 shadow"
+            size="icon"
+          >
+            <CircleDashed className="size-6 text-white" />
+          </Button>
+          <Button variant="destructive" className="shadow" size="icon">
+            <Trash2 className="size-6 " />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

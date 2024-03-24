@@ -212,7 +212,10 @@ const Header = () => {
               </Select>
               <DialogFooter className="flex w-full justify-between">
                 <DialogClose asChild>
-                  <Button type="submit" onClick={() => console.log(session)}>
+                  <Button
+                    type="submit"
+                    onClick={() => toast.success("Your changes has saved")}
+                  >
                     Save changes
                   </Button>
                 </DialogClose>

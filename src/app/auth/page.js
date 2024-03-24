@@ -26,7 +26,7 @@ const Auth = () => {
         email: z.string().min(1, { message: "You forgot to enter your email" }),
         password: z
           .string()
-          .min(4, { message: "Password must contain at least 6 characters" }),
+          .min(4, { message: "Password must contain at least 4 characters" }),
       })
     : z.object({
         name: z.string().min(1, { message: "Enter your first name" }),
@@ -34,7 +34,7 @@ const Auth = () => {
         email: z.string().min(1, { message: "You forgot to enter your email" }),
         password: z
           .string()
-          .min(4, { message: "Password must contain at least 6 characters" }),
+          .min(4, { message: "Password must contain at least 4 characters" }),
       });
 
   const {
@@ -63,7 +63,10 @@ const Auth = () => {
       }
     } else {
       try {
-        const res = await fetch("http://localhost:3000/api/user", {
+        // http://localhost:3000/api/user
+        // https://todo-weather.vercel.app/api/user 
+
+        const res = await fetch("https://todo-weather.vercel.app/api/user", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -268,7 +271,7 @@ const Auth = () => {
               variant="ghost"
               disabled={loading}
               onClick={() => {
-                signIn(), setLoading(true);
+                signIn("facebook", { callbackUrl: "/tasks" }), setLoading(true);
               }}
               className="flex border border-black w-full h-16 flex items-center justify-center flex h-[49px] text-[16px] mb-6"
             >
@@ -276,10 +279,10 @@ const Auth = () => {
                 className="mr-2"
                 height="18"
                 width="18"
-                alt="apple"
-                src="/apple.png"
+                alt="facebook"
+                src="/Facebook_f_logo_(2019).svg"
               />
-              <p>Continue with Apple</p>
+              <p>Continue with Facebook</p>
             </Button>
           </form>
         </div>

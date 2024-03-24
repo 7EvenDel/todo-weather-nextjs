@@ -1,6 +1,7 @@
 import NextAuth, { User } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import AppleProvider from "next-auth/providers/apple";
+import FacebookProvider from "next-auth/providers/facebook";
 import Credentials from "next-auth/providers/credentials";
 import { MongoClient } from "mongodb";
 
@@ -21,6 +22,10 @@ const handler = NextAuth({
     //   clientId: process.env.APPLE_ID,
     //   clientSecret: process.env.APPLE_SECRET,
     // }),
+    FacebookProvider({
+      clientId: process.env.FACEBOOK_CLIENT_ID,
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+    }),
     Credentials({
       credentials: {
         email: { label: "email", type: "email", required: true },
