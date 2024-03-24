@@ -13,9 +13,43 @@ import {
 } from "lucide-react";
 import { Separator } from "../../components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { useSession } from "next-auth/react";
+import Image from "next/image";
+import Link from "next/link";
 
 const MyTasks = () => {
   const [category, setCategory] = useState("Personal");
+  const session = useSession();
+
+  if (session.status === "loading") {
+    return (
+      <Image
+        className="mx-auto mt-40"
+        src="/Gear-0.2s-200px.gif"
+        width={200}
+        height={200}
+        alt="Loading..."
+      />
+    );
+  }
+
+  if (session.status === "unauthenticated") {
+    return (
+      <div className="text-center w-full mt-40">
+        <h1 className="text-2xl">Here is nothing we can show you.</h1>
+        <p className="text-lg">
+          May be you want to{" "}
+          <Link href="/auth">
+            <Button variant="link" className="p-0 text-lg">
+              sign in
+            </Button>
+          </Link>
+          ?
+        </p>
+      </div>
+    );
+  }
+
   return (
     <section className="flex flex-col pt-8">
       <Tabs
