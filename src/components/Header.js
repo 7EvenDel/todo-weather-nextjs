@@ -34,6 +34,7 @@ import Image from "next/image";
 import { InfoIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
+import { toast } from "sonner";
 
 const Header = () => {
   const { data: session } = useSession();
@@ -219,7 +220,9 @@ const Header = () => {
                   <Button
                     type="submit"
                     variant="destructive"
-                    onClick={() => signOut()}
+                    onClick={() => {
+                      signOut();
+                    }}
                   >
                     Sign out
                   </Button>

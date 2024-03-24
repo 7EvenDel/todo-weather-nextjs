@@ -11,10 +11,12 @@ import { z } from "zod";
 import { Checkbox } from "../../components/ui/checkbox";
 import Image from "next/image";
 import { signIn, signOut, useSession } from "next-auth/react";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Cog } from "lucide-react";
 
 const Auth = () => {
-  const [sending, setSending] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [login, setLogin] = useState(true);
   const session = useSession();
   const router = useRouter();
@@ -44,8 +46,7 @@ const Auth = () => {
   });
 
   const onSubmit = async (data) => {
-    // setSending(true);
-    console.log("login: " + login, data);
+    setLoading(true);
     if (login) {
       const res = await signIn("credentials", {
         callbackUrl: "/tasks",
@@ -53,9 +54,12 @@ const Auth = () => {
         redirect: false,
       });
       if (res && !res.error) {
+        setLoading(false);
+        toast.success("You successfully logged in.");
         router.push("/tasks");
       } else {
-        console.log("auth error");
+        setLoading(false);
+        toast.warning("Wrong e-mail or password");
       }
     } else {
       try {
@@ -67,16 +71,14 @@ const Auth = () => {
           body: JSON.stringify(data),
         });
         if (!res.ok) {
-          // openPopup("Data wasn't sent");
-          setSending(false);
           throw new Error("failed to fetch");
         }
-        setSending(false);
-        // openPopup("Ваші дані успішно надіслані!");
-        return res.text();
+        setLoading(false);
+        toast.success("Your account has been created");
+        setLogin(true);
       } catch (error) {
-        // openPopup("Не вдалося надіслати...");
-        setSending(false);
+        toast.warning("User with this e-mail is already exists");
+        setLoading(false);
       }
     }
   };
@@ -200,10 +202,7 @@ const Auth = () => {
               </Button>
             ) : (
               <div className="flex gap-2 items-center mb-6">
-                <Checkbox
-                  className="size-[18px] rounded border-black"
-                  // onCheckedChange={() => setSending(true)}
-                />
+                <Checkbox className="size-[18px] rounded border-black" />
                 <Label className="text-[14px]">
                   I agree to DopeSass{" "}
                   <Button variant="link" className="p-0 py-0 h-4" type="button">
@@ -219,14 +218,25 @@ const Auth = () => {
 
             <Button
               type="submit"
-              disabled={sending}
+              disabled={loading}
               className={
-                sending
+                loading
                   ? "w-full h-16 flex items-center justify-center flex h-[49px] text-[16px] mb-6"
                   : "w-full h-16 flex items-center justify-center cursor-pointer flex h-[49px] text-[16px] mb-6"
               }
             >
-              <p>{sending ? "Wait..." : login ? "Log in" : "Create Account"}</p>
+              <p>
+                {loading ? (
+                  <span className="flex items-center">
+                    <Cog className="animate-spin mr-2 size-5" />
+                    Loading
+                  </span>
+                ) : login ? (
+                  "Log in"
+                ) : (
+                  "Create Account"
+                )}
+              </p>
             </Button>
 
             <div className="flex items-center justify-between mb-6">
@@ -238,13 +248,11 @@ const Auth = () => {
             <Button
               type="button"
               variant="ghost"
-              disabled={sending}
-              onClick={() => signIn("google", { callbackUrl: "/tasks" })}
-              className={
-                sending
-                  ? "flex border border-black w-full h-16 flex items-center justify-center flex h-[49px] text-[16px] mb-4"
-                  : "flex border border-black w-full h-16 flex items-center justify-center cursor-pointer flex h-[49px] text-[16px] mb-4"
-              }
+              disabled={loading}
+              onClick={() => {
+                signIn("google", { callbackUrl: "/tasks" }), setLoading(true);
+              }}
+              className="flex border border-black w-full h-16 flex items-center justify-center flex h-[49px] text-[16px] mb-4"
             >
               <Image
                 className="mr-2"
@@ -258,13 +266,11 @@ const Auth = () => {
             <Button
               type="button"
               variant="ghost"
-              disabled={sending}
-              onClick={() => signIn()}
-              className={
-                sending
-                  ? "flex border border-black w-full h-16 flex items-center justify-center flex h-[49px] text-[16px] mb-6"
-                  : "flex border border-black w-full h-16 flex items-center justify-center cursor-pointer flex h-[49px] text-[16px] mb-6"
-              }
+              disabled={loading}
+              onClick={() => {
+                signIn(), setLoading(true);
+              }}
+              className="flex border border-black w-full h-16 flex items-center justify-center flex h-[49px] text-[16px] mb-6"
             >
               <Image
                 className="mr-2"
