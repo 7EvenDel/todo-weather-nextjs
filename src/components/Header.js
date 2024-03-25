@@ -1,14 +1,19 @@
 "use client";
 
+import {
+  Form,
+  FormControl,
+  FormItem,
+  FormField,
+  FormLabel,
+  FormDescription,
+  FormMessage,
+} from "./ui/form";
 import Link from "next/link";
 import { Label } from "./ui/label";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
@@ -35,6 +40,10 @@ import { InfoIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { toast } from "sonner";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 const Header = () => {
   const { data: session } = useSession();
@@ -89,148 +98,7 @@ const Header = () => {
               />
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  Edit profile
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <InfoIcon className="size-4 text-gray-700" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>
-                          Your account`s data can be used by DopeSass Terms of
-                          service and Privacy policy
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </DialogTitle>
-                <DialogDescription>
-                  Make changes to your profile here
-                </DialogDescription>
-                <img
-                  src={
-                    session?.user.image
-                      ? session.user.image
-                      : "https://cdn-icons-png.freepik.com/256/1144/1144760.png"
-                  }
-                  alt="user"
-                  className="size-12 rounded-full absolute right-10 top-3"
-                />
-              </DialogHeader>
-              <Input
-                id="name"
-                defaultValue={session?.user.name}
-                className="w-full"
-              />
-              <Input
-                id="username"
-                defaultValue={session?.user.email}
-                className="w-full"
-              />
-              <Select>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Language" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Select your language</SelectLabel>
-                    <SelectItem value="ukrainian">Ukrainian</SelectItem>
-                    <SelectItem value="english">English</SelectItem>
-                    <SelectItem value="italian">Italian</SelectItem>
-                    <SelectItem value="germany">Germany</SelectItem>
-                    <SelectItem value="french">French</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <div className="flex gap-2 w-full">
-                <Select>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Date Format" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Select date format</SelectLabel>
-                      <SelectItem value="ukrainian">MM/DD/YYYY</SelectItem>
-                      <SelectItem value="english">DD/MM/YYYY</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-                <Select>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Time Format" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Select time format</SelectLabel>
-                      <SelectItem value="ukrainian">12h (am/pm)</SelectItem>
-                      <SelectItem value="english">24h</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Select>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Country" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Select your country</SelectLabel>
-                    <SelectItem value="ukraine">Ukraine</SelectItem>
-                    <SelectItem value="usa">United States</SelectItem>
-                    <SelectItem value="italy">Italy</SelectItem>
-                    <SelectItem value="germany">Germany</SelectItem>
-                    <SelectItem value="france">France</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <Select>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Time Zone" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Select your country</SelectLabel>
-                    <SelectItem value="uscanada">
-                      Central Time - US & Canada
-                    </SelectItem>
-                    <SelectItem value="uscanada1">
-                      Central Time - US & Canada
-                    </SelectItem>
-                    <SelectItem value="uscanada2">
-                      Central Time - US & Canada
-                    </SelectItem>
-                    <SelectItem value="uscanada3">
-                      Central Time - US & Canada
-                    </SelectItem>
-                    <SelectItem value="uscanada4">
-                      Central Time - US & Canada
-                    </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <DialogFooter className="flex w-full justify-between">
-                <DialogClose asChild>
-                  <Button
-                    type="submit"
-                    onClick={() => toast.success("Your changes has saved")}
-                  >
-                    Save changes
-                  </Button>
-                </DialogClose>
-                <DialogClose asChild>
-                  <Button
-                    type="submit"
-                    variant="destructive"
-                    onClick={() => {
-                      signOut();
-                    }}
-                  >
-                    Sign out
-                  </Button>
-                </DialogClose>
-              </DialogFooter>
+              <ProfileForm />
             </DialogContent>
           </Dialog>
         ) : (
@@ -245,6 +113,93 @@ const Header = () => {
         )}
       </div>
     </header>
+  );
+};
+
+const FormSchema = z.object({
+  username: z.string().min(2, {
+    message: "Username must be at least 2 characters.",
+  }),
+  email: z
+    .string({
+      required_error: "Please select an email to display.",
+    })
+    .email(),
+});
+
+const ProfileForm = () => {
+  const { data: session } = useSession();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(FormSchema),
+  });
+
+  const onSubmit = (data) => {
+    console.log("submitted");
+    console.log(data);
+  };
+
+  const form = useForm({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      // username: "",
+    },
+  });
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-2/3 space-y-6">
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a verified email to display" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="m@example.com">m@example.com</SelectItem>
+                  <SelectItem value="m@google.com">m@google.com</SelectItem>
+                  <SelectItem value="m@support.com">m@support.com</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                You can manage email addresses in your{" "}
+                <Link href="/examples/forms">email settings</Link>.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="username"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Username</FormLabel>
+              <FormControl>
+                <Input placeholder="shadcn" {...field} />
+              </FormControl>
+              <FormDescription>
+                This is your public display name.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <DialogClose asChild>
+          <Button type="submit">Submit</Button>
+        </DialogClose>
+      </form>
+    </Form>
   );
 };
 
