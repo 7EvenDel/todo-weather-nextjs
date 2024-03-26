@@ -2,7 +2,7 @@
 
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Calendar,
   Check,
@@ -19,6 +19,7 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
+import NewTask from "@/components/NewTask";
 
 const categories = [
   { label: "Personal", value: "personal" },
@@ -29,6 +30,32 @@ const categories = [
 const MyTasks = () => {
   const [category, setCategory] = useState("Personal");
   const session = useSession();
+
+  const registerBySocial = async () => {
+    try {
+      // http://localhost:3000/api/user
+      // https://todo-weather.vercel.app/api/user
+      console.log({ ...session.data.user, password: "1234" });
+      const res = await fetch("http://localhost:3000/api/user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...session.data.user, password: "1234" }),
+      });
+      if (!res.ok) {
+        throw new Error("failed to fetch");
+      }
+      console.log("account has been created");
+    } catch (error) {
+      console.log("User with this e-mail is already exists");
+    }
+  };
+
+  useEffect(() => {
+    registerBySocial();
+    console.log(session);
+  }, []);
 
   if (session.status === "loading") {
     return (
@@ -141,9 +168,12 @@ const Day = () => {
       <Separator className="my-2" />
       <div className="flex justify-between">
         <div className="w-80">
-          <p className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold">
-            <StickyNote className="size-4 mr-2 text-blue-500" /> ToDo
-          </p>
+          <div className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold flex justify-between">
+            <p className="flex items-center">
+              <StickyNote className="size-4 mr-2 text-blue-500" /> ToDo
+            </p>
+            <NewTask />
+          </div>
           <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
             <div className="flex justify-between">
               <h3 className="font-semibold">Task title</h3>
@@ -180,9 +210,13 @@ const Day = () => {
           </div>
         </div>
         <div className="w-80">
-          <p className="p-4 flex bg-gray-50 items-center rounded-xl drop-shadow w-full mb-4 font-semibold">
-            <CircleDashed className="size-4 mr-2 text-yellow-500" /> In progress
-          </p>
+          <div className="p-4 flex bg-gray-50 items-center rounded-xl drop-shadow w-full mb-4 font-semibold justify-between">
+            <p className="flex items-center">
+              <CircleDashed className="size-4 mr-2 text-yellow-500" /> In
+              progress
+            </p>
+            <NewTask />
+          </div>
           <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
             <div className="flex justify-between">
               <h3 className="font-semibold">Task title</h3>
@@ -257,9 +291,12 @@ const Day = () => {
           </div>
         </div>
         <div className="w-80">
-          <p className="p-4 bg-gray-50 rounded-xl drop-shadow items-center flex w-full mb-4 font-semibold">
-            <CircleCheck className="size-4 mr-2 text-green-500" /> Done
-          </p>
+          <div className="p-4 bg-gray-50 rounded-xl drop-shadow items-center flex w-full mb-4 font-semibold justify-between">
+            <p className="flex items-center">
+              <CircleCheck className="size-4 mr-2 text-green-500" /> Done
+            </p>
+            <NewTask />
+          </div>
           <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
             <div className="flex justify-between">
               <h3 className="font-semibold">Task title</h3>
@@ -304,10 +341,13 @@ const Week = () => {
     <ScrollArea className="bg-white -mt-2 min-h-[750px] rounded-r-xl w-[1176px] rounded-b-xl p-8">
       <div className="flex justify-between gap-16">
         <div className="w-80">
-          <p className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold">
-            <Calendar className="size-4 mr-2 " />
-            12.02
-          </p>
+          <div className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold justify-between">
+            <p className="flex items-center">
+              <Calendar className="size-4 mr-2 " />
+              12.02
+            </p>
+            <NewTask />
+          </div>
           <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
             <div className="flex justify-between">
               <h3 className="font-semibold">Task title</h3>
@@ -344,10 +384,13 @@ const Week = () => {
           </div>
         </div>
         <div className="w-80">
-          <p className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold">
-            <Calendar className="size-4 mr-2 " />
-            13.02
-          </p>
+          <div className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold justify-between">
+            <p className="flex items-center">
+              <Calendar className="size-4 mr-2 " />
+              13.02
+            </p>
+            <NewTask />
+          </div>
           <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
             <div className="flex justify-between">
               <h3 className="font-semibold">Task title</h3>
@@ -384,10 +427,13 @@ const Week = () => {
           </div>
         </div>
         <div className="w-80">
-          <p className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold">
-            <Calendar className="size-4 mr-2 " />
-            14.02
-          </p>
+          <div className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold justify-between">
+            <p className="flex items-center">
+              <Calendar className="size-4 mr-2 " />
+              14.02
+            </p>
+            <NewTask />
+          </div>
           <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
             <div className="flex justify-between">
               <h3 className="font-semibold">Task title</h3>
@@ -424,10 +470,13 @@ const Week = () => {
           </div>
         </div>
         <div className="w-80">
-          <p className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold">
-            <Calendar className="size-4 mr-2 " />
-            15.02
-          </p>
+          <div className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold justify-between">
+            <p className="flex items-center">
+              <Calendar className="size-4 mr-2 " />
+              15.02
+            </p>
+            <NewTask />
+          </div>
           <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
             <div className="flex justify-between">
               <h3 className="font-semibold">Task title</h3>
@@ -464,10 +513,13 @@ const Week = () => {
           </div>
         </div>
         <div className="w-80">
-          <p className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold">
-            <Calendar className="size-4 mr-2 " />
-            16.02
-          </p>
+          <div className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold justify-between">
+            <p className="flex items-center">
+              <Calendar className="size-4 mr-2 " />
+              16.02
+            </p>
+            <NewTask />
+          </div>
           <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
             <div className="flex justify-between">
               <h3 className="font-semibold">Task title</h3>
@@ -504,10 +556,13 @@ const Week = () => {
           </div>
         </div>
         <div className="w-80">
-          <p className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold">
-            <Calendar className="size-4 mr-2 " />
-            17.02
-          </p>
+          <div className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold justify-between">
+            <p className="flex items-center">
+              <Calendar className="size-4 mr-2 " />
+              17.02
+            </p>
+            <NewTask />
+          </div>
           <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
             <div className="flex justify-between">
               <h3 className="font-semibold">Task title</h3>
@@ -544,10 +599,13 @@ const Week = () => {
           </div>
         </div>
         <div className="w-80">
-          <p className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold">
-            <Calendar className="size-4 mr-2 " />
-            18.02
-          </p>
+          <div className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold justify-between">
+            <p className="flex items-center">
+              <Calendar className="size-4 mr-2 " />
+              18.02
+            </p>
+            <NewTask />
+          </div>
           <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
             <div className="flex justify-between">
               <h3 className="font-semibold">Task title</h3>

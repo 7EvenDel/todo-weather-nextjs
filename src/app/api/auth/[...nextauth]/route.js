@@ -44,11 +44,11 @@ const handler = NextAuth({
           .toArray();
         await client.close();
 
-        if (currentUser.length === 1) {
+        if (currentUser.length > 0) {
           const { password, _id, ...userWithoutPassAndId } = currentUser[0];
+          console.log(userWithoutPassAndId);
           return userWithoutPassAndId;
         }
-
         return null;
       },
     }),
