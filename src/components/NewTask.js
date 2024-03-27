@@ -17,7 +17,7 @@ import {
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { CalendarIcon, SquarePlus } from "lucide-react";
+import { CalendarIcon, Cog, SquarePlus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Input } from "./ui/input";
@@ -56,8 +56,9 @@ import {
 
 import { useSession } from "next-auth/react";
 import { Textarea } from "./ui/textarea";
+import { useState } from "react";
 
-const NewTask = () => {
+const NewTask = ({ getAllTasks }) => {
   return (
     <Dialog>
       <DialogTrigger asChild className="mt-2 relative size-12">
@@ -81,7 +82,7 @@ const NewTask = () => {
             </TooltipProvider>
           </DialogTitle>
         </DialogHeader>
-        <NewTaskForm />
+        <NewTaskForm getAllTasks={getAllTasks} />
       </DialogContent>
     </Dialog>
   );
@@ -105,8 +106,9 @@ const FormSchema = z.object({
   }),
 });
 
-const NewTaskForm = () => {
+const NewTaskForm = ({ getAllTasks }) => {
   const { data: session } = useSession();
+  const [loading, setLoading] = useState(false);
 
   const {
     register,
@@ -117,47 +119,35 @@ const NewTaskForm = () => {
   });
 
   const onSubmit = async (data) => {
-    const task = { ...data, dateFinish: undefined, timeFinish: undefined };
-    toast.success("New task added");
-    console.log(task);
-
+    const task = {
+      ...data,
+      dateFinish: undefined,
+      timeFinish: undefined,
+      status: "todo",
+    };
     setLoading(true);
-    if (login) {
-      const res = await signIn("credentials", {
-        callbackUrl: "/tasks",
-        ...data,
-        redirect: false,
-      });
-      if (res && !res.error) {
-        setLoading(false);
-        toast.success("You successfully logged in.");
-        router.push("/tasks");
-      } else {
-        setLoading(false);
-        toast.warning("Wrong e-mail or password");
-      }
-    } else {
-      try {
-        // http://localhost:3000/api/user
-        // https://todo-weather.vercel.app/api/user
+    toast.info("Sending...");
+    try {
+      // http://localhost:3000/api/user
+      // https://todo-weather.vercel.app/api/user
 
-        const res = await fetch("http://localhost:3000/api/user", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
-        if (!res.ok) {
-          throw new Error("failed to fetch");
-        }
-        setLoading(false);
-        toast.success("Your account has been created");
-        setLogin(true);
-      } catch (error) {
-        toast.warning("User with this e-mail is already exists");
-        setLoading(false);
+      const res = await fetch("http://localhost:3000/api/tasks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ task, email: session.user.email }),
+      });
+      if (!res.ok) {
+        throw new Error("failed to fetch");
       }
+      toast.success("Task created.");
+      setLoading(false);
+      getAllTasks();
+    } catch (error) {
+      toast.warning("Could not add your task.");
+      setLoading(false);
+      getAllTasks();
     }
   };
 
@@ -246,7 +236,7 @@ const NewTaskForm = () => {
                       selected={field.value}
                       onSelect={field.onChange}
                       disabled={(date) =>
-                        date > new Date() || date < new Date("1900-01-01")
+                        date < new Date() || date < new Date("1900-01-01")
                       }
                       initialFocus
                     />
@@ -318,7 +308,14 @@ const NewTaskForm = () => {
         />
         <div className="flex justify-between">
           {/* <DialogClose asChild> */}
-          <Button type="submit">Submit</Button>
+          <Button
+            type="submit"
+            disabled={loading}
+            className="flex justify-center"
+          >
+            {loading ? <Cog className="animate-spin mr-2 size-5" /> : null}
+            <p className="">Submit</p>
+          </Button>
           {/* </DialogClose> */}
           <DialogClose asChild>
             <Button type="button" variant="outline">

@@ -48,7 +48,7 @@ export async function POST(request) {
     //     { $push: { tasks: "Educational" } }
     //   );
     if (!similarUser) {
-      console.log(similarUser, "added");
+      // console.log(similarUser, "added");
       await client
         .db("todo-weather")
         .collection("users")
@@ -63,9 +63,11 @@ export async function POST(request) {
         });
       return new NextResponse("User data successfully sent to DB");
     } else {
-      console.log(similarUser, "did not added");
+      // console.log(similarUser, "did not added");
 
-      return new Error("User with this email is already exists");
+      return new Response("User with this email is already exists", {
+        status: 500,
+      });
     }
   } finally {
     await client.close();

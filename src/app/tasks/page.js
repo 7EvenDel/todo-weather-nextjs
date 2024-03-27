@@ -29,13 +29,59 @@ const categories = [
 
 const MyTasks = () => {
   const [category, setCategory] = useState("Personal");
+  const [loading, setLoading] = useState(false);
+  const [tasks, setTasks] = useState([]);
   const session = useSession();
+
+  const getAllTasks = async () => {
+    try {
+      setLoading(true);
+      // http://localhost:3000/api/tasks
+      // https://todo-weather.vercel.app/api/tasks
+      const res = await fetch(
+        `http://localhost:3000/api/tasks?email=${session.data.user.email}`
+      );
+      if (!res.ok) {
+        throw new Error("failed to fetch");
+      }
+      const data = await res.json();
+      setTasks(data.tasks);
+      setLoading(false);
+    } catch (error) {
+      toast.warning("Couldn't get your tasks from server");
+      setLoading(false);
+    }
+  };
+
+  const setTaskStatus = async (title, status) => {
+    try {
+      // http://localhost:3000/api/tasks
+      // https://todo-weather.vercel.app/api/tasks
+      const res = await fetch("http://localhost:3000/api/tasks", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: session.data.user.email, title, status }),
+      });
+      console.log(res);
+
+      if (!res.ok) {
+        console.log("asdkjlasdjklaklds");
+
+        throw new Error("failed to fetch");
+      }
+      toast.success("Updated!");
+      getAllTasks();
+    } catch (error) {
+      toast.warning("Couldn't connect the server...");
+    }
+  };
 
   const registerBySocial = async () => {
     try {
       // http://localhost:3000/api/user
       // https://todo-weather.vercel.app/api/user
-      console.log({ ...session.data.user, password: "1234" });
       const res = await fetch("http://localhost:3000/api/user", {
         method: "POST",
         headers: {
@@ -48,16 +94,18 @@ const MyTasks = () => {
       }
       console.log("account has been created");
     } catch (error) {
-      console.log("User with this e-mail is already exists");
+      // console.log("User with this e-mail is already exists");
     }
   };
 
   useEffect(() => {
-    registerBySocial();
-    console.log(session);
-  }, []);
+    if (session.status === "authenticated") {
+      registerBySocial();
+      getAllTasks();
+    }
+  }, [session]);
 
-  if (session.status === "loading") {
+  if (session.status === "loading" || loading) {
     return (
       <Image
         className="mx-auto mt-40"
@@ -82,6 +130,20 @@ const MyTasks = () => {
           </Link>
           ?
         </p>
+      </div>
+    );
+  }
+
+  if (!loading && session.status !== "loading" && tasks.length === 0) {
+    return (
+      <div className="text-center w-full mt-40">
+        <h1 className="text-2xl">Hey, you have no tasks at all</h1>
+        <div className="text-lg flex items-center w-full justify-center mt-2">
+          <p className="mr-2">Want to add some? </p>
+          <div className="-mt-2">
+            <NewTask getAllTasks={getAllTasks} />
+          </div>
+        </div>
       </div>
     );
   }
@@ -136,20 +198,51 @@ const MyTasks = () => {
           </div>
         </TabsList>
         <TabsContent value="day" className="w-full">
-          <Day />
+          <Day
+            tasks={tasks}
+            loading={loading}
+            getAllTasks={getAllTasks}
+            setTaskStatus={setTaskStatus}
+          />
         </TabsContent>
         <TabsContent value="week" className="w-full">
-          <Week />
+          <Week
+            tasks={tasks}
+            loading={loading}
+            getAllTasks={getAllTasks}
+            setTaskStatus={setTaskStatus}
+          />
         </TabsContent>
         <TabsContent value="all" className="w-full">
-          <All />
+          <All
+            tasks={tasks}
+            loading={loading}
+            getAllTasks={getAllTasks}
+            setTaskStatus={setTaskStatus}
+          />
         </TabsContent>
       </Tabs>
     </section>
   );
 };
 
-const Day = () => {
+const Day = ({ tasks, loading, getAllTasks, setTaskStatus }) => {
+  const today = new Date();
+  const todayTasks = tasks.filter((task) => {
+    const taskDate = new Date(task.dateStart);
+    taskDate.setDate(taskDate.getDate() - 1);
+    const isToday =
+      taskDate.getDate() === today.getDate() &&
+      taskDate.getMonth() === today.getMonth() &&
+      taskDate.getFullYear() === today.getFullYear();
+    return isToday;
+  });
+  const todoTasks = todayTasks.filter((task) => task.status === "todo");
+  const inProgressTasks = todayTasks.filter(
+    (task) => task.status === "inProgress"
+  );
+  const doneTasks = todayTasks.filter((task) => task.status === "done");
+
   return (
     <div className="bg-white w-full -mt-2 min-h-[750px] rounded-r-xl rounded-b-xl p-8">
       <div className="flex justify-between">
@@ -168,46 +261,60 @@ const Day = () => {
       <Separator className="my-2" />
       <div className="flex justify-between">
         <div className="w-80">
-          <div className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold flex justify-between">
+          <div className="p-4 bg-gray-50 rounded-xl h-14 flex items-center drop-shadow w-full mb-4 font-semibold flex justify-between">
             <p className="flex items-center">
               <StickyNote className="size-4 mr-2 text-blue-500" /> ToDo
             </p>
-            <NewTask />
+            <NewTask getAllTasks={getAllTasks} />
           </div>
-          <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
-            <div className="flex justify-between">
-              <h3 className="font-semibold">Task title</h3>
-              <p className="text-gray-500 text-sm">07:09 - 08:23</p>
-            </div>
-            <div className="flex justify-between ">
-              <p className="w-56 text-sm">
-                Task description Task description Task description
-              </p>
-              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
-              <p className="text-gray-500 h-10 text-sm flex items-center">
-                +12°
-              </p>
-            </div>
-            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
-              <Button
-                variant=""
-                className="hover:bg-green-500 bg-green-600 shadow"
-                size="icon"
+          {todoTasks.map((task, i) => {
+            return (
+              <div
+                key={i}
+                className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4"
               >
-                <Check className="size-6 " />
-              </Button>
-              <Button
-                variant="secondary"
-                className="hover:bg-yellow-400 bg-yellow-500 shadow"
-                size="icon"
-              >
-                <CircleDashed className="size-6 text-white" />
-              </Button>
-              <Button variant="destructive" className="shadow" size="icon">
-                <Trash2 className="size-6 " />
-              </Button>
-            </div>
-          </div>
+                <div className="flex justify-between">
+                  <h3 className="font-semibold">{task.title}</h3>
+                  <p className="text-gray-500 text-sm">
+                    {task.timeStart}:00 - [...]
+                  </p>
+                </div>
+                <div className="flex justify-between ">
+                  <p className="w-56 text-sm">{task.description}</p>
+                  <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+                  <p className="text-gray-500 h-10 text-sm flex items-center">
+                    +12°
+                  </p>
+                </div>
+                <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+                  <Button
+                    variant=""
+                    className="hover:bg-green-500 bg-green-600 shadow"
+                    size="icon"
+                    onClick={() => setTaskStatus(task.title, "done")}
+                  >
+                    <Check className="size-6 " />
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    className="hover:bg-yellow-400 bg-yellow-500 shadow"
+                    onClick={() => setTaskStatus(task.title, "inProgress")}
+                    size="icon"
+                  >
+                    <CircleDashed className="size-6 text-white" />
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    className="shadow"
+                    size="icon"
+                    onClick={() => setTaskStatus(task.title, "deleted")}
+                  >
+                    <Trash2 className="size-6 " />
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
         </div>
         <div className="w-80">
           <div className="p-4 flex bg-gray-50 items-center rounded-xl drop-shadow w-full mb-4 font-semibold justify-between">
@@ -215,128 +322,128 @@ const Day = () => {
               <CircleDashed className="size-4 mr-2 text-yellow-500" /> In
               progress
             </p>
-            <NewTask />
           </div>
-          <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
-            <div className="flex justify-between">
-              <h3 className="font-semibold">Task title</h3>
-              <p className="text-gray-500 text-sm">07:09 - 08:23</p>
-            </div>
-            <div className="flex justify-between ">
-              <p className="w-56 text-sm">
-                Task description Task description Task description Task
-                description Task description
-              </p>
-              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
-              <p className="text-gray-500 h-10 text-sm flex items-center">
-                +12°
-              </p>
-            </div>
-            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
-              <Button
-                variant=""
-                className="hover:bg-green-500 bg-green-600 shadow"
-                size="icon"
+          {inProgressTasks.map((task, i) => {
+            return (
+              <div
+                key={i}
+                className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4"
               >
-                <Check className="size-6 " />
-              </Button>
-              <Button
-                variant="secondary"
-                className="hover:bg-yellow-400 bg-yellow-500 shadow"
-                size="icon"
-                disabled
-              >
-                <CircleDashed className="size-6 text-white" disa />
-              </Button>
-              <Button variant="destructive" className="shadow" size="icon">
-                <Trash2 className="size-6 " />
-              </Button>
-            </div>
-          </div>
-          <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
-            <div className="flex justify-between">
-              <h3 className="font-semibold">Task title</h3>
-              <p className="text-gray-500 text-sm">07:09 - 08:23</p>
-            </div>
-            <div className="flex justify-between ">
-              <p className="w-56 text-sm">
-                Task description Task description Task description Task
-                description Task description
-              </p>
-              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
-              <p className="text-gray-500 h-10 text-sm flex items-center">
-                +12°
-              </p>
-            </div>
-            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
-              <Button
-                variant=""
-                className="hover:bg-green-500 bg-green-600 shadow"
-                size="icon"
-              >
-                <Check className="size-6 " />
-              </Button>
-              <Button
-                variant="secondary"
-                className="hover:bg-yellow-400 bg-yellow-500 shadow"
-                size="icon"
-                disabled
-              >
-                <CircleDashed className="size-6 text-white" disa />
-              </Button>
-              <Button variant="destructive" className="shadow" size="icon">
-                <Trash2 className="size-6 " />
-              </Button>
-            </div>
-          </div>
+                <div className="flex justify-between">
+                  <h3 className="font-semibold">{task.title}</h3>
+                  <p className="text-gray-500 text-sm">
+                    {task.timeStart}:00 - [...]
+                  </p>
+                </div>
+                <div className="flex justify-between ">
+                  <p className="w-56 text-sm">{task.description}</p>
+                  <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+                  <p className="text-gray-500 h-10 text-sm flex items-center">
+                    +12°
+                  </p>
+                </div>
+                <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+                  <Button
+                    variant=""
+                    className="hover:bg-green-500 bg-green-600 shadow"
+                    size="icon"
+                    onClick={() => setTaskStatus(task.title, "done")}
+                  >
+                    <Check className="size-6 " />
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    className="hover:bg-yellow-400 bg-yellow-500 shadow"
+                    size="icon"
+                    disabled
+                  >
+                    <CircleDashed className="size-6 text-white" />
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    className="shadow"
+                    size="icon"
+                    onClick={() => setTaskStatus(task.title, "deleted")}
+                  >
+                    <Trash2 className="size-6 " />
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
         </div>
+
         <div className="w-80">
           <div className="p-4 bg-gray-50 rounded-xl drop-shadow items-center flex w-full mb-4 font-semibold justify-between">
             <p className="flex items-center">
               <CircleCheck className="size-4 mr-2 text-green-500" /> Done
             </p>
-            <NewTask />
           </div>
-          <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
-            <div className="flex justify-between">
-              <h3 className="font-semibold">Task title</h3>
-              <p className="text-gray-500 text-sm">07:09 - 08:23</p>
-            </div>
-            <div className="flex justify-between ">
-              <p className="w-56 text-sm">Task description</p>
-              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
-              <p className="text-gray-500 h-10 text-sm flex items-center">
-                +12°
-              </p>
-            </div>
-            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
-              <Button
-                variant=""
-                className="bg-green-600 shadow"
-                size="icon"
-                disabled
+          {doneTasks.map((task, i) => {
+            return (
+              <div
+                key={i}
+                className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4"
               >
-                <Check className="size-6 " />
-              </Button>
-              <Button
-                variant="secondary"
-                className="hover:bg-yellow-400 bg-yellow-500 shadow"
-                size="icon"
-              >
-                <CircleDashed className="size-6 text-white" />
-              </Button>
-              <Button variant="destructive" className="shadow" size="icon">
-                <Trash2 className="size-6 " />
-              </Button>
-            </div>
-          </div>
+                <div className="flex justify-between">
+                  <h3 className="font-semibold">{task.title}</h3>
+                  <p className="text-gray-500 text-sm">
+                    {task.timeStart}:00 - {task?.timeFinish}
+                  </p>
+                </div>
+                <div className="flex justify-between ">
+                  <p className="w-56 text-sm">{task.description}</p>
+                  <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+                  <p className="text-gray-500 h-10 text-sm flex items-center">
+                    +12°
+                  </p>
+                </div>
+                <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+                  <Button
+                    variant=""
+                    className="bg-green-600 shadow"
+                    size="icon"
+                    disabled
+                  >
+                    <Check className="size-6 " />
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    className="hover:bg-yellow-400 bg-yellow-500 shadow"
+                    onClick={() => setTaskStatus(task.title, "inProgress")}
+                    size="icon"
+                  >
+                    <CircleDashed className="size-6 text-white" />
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    className="shadow"
+                    size="icon"
+                    onClick={() => setTaskStatus(task.title, "deleted")}
+                  >
+                    <Trash2 className="size-6 " />
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
   );
 };
 
-const Week = () => {
+const Week = ({ tasks, getAllTasks, setTaskStatus }) => {
+  const currentDate = new Date();
+
+  const nextWeekDate = new Date(currentDate);
+  nextWeekDate.setDate(currentDate.getDate() + 7);
+
+  const tasksForNextWeek = tasks.filter((task) => {
+    const taskDate = new Date(task.dateStart);
+    return taskDate >= currentDate && taskDate < nextWeekDate;
+  });
+
   return (
     <ScrollArea className="bg-white -mt-2 min-h-[750px] rounded-r-xl w-[1176px] rounded-b-xl p-8">
       <div className="flex justify-between gap-16">
@@ -346,7 +453,7 @@ const Week = () => {
               <Calendar className="size-4 mr-2 " />
               12.02
             </p>
-            <NewTask />
+            <NewTask getAllTasks={getAllTasks} />
           </div>
           <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
             <div className="flex justify-between">
@@ -389,7 +496,7 @@ const Week = () => {
               <Calendar className="size-4 mr-2 " />
               13.02
             </p>
-            <NewTask />
+            <NewTask getAllTasks={getAllTasks} />
           </div>
           <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
             <div className="flex justify-between">
@@ -432,7 +539,7 @@ const Week = () => {
               <Calendar className="size-4 mr-2 " />
               14.02
             </p>
-            <NewTask />
+            <NewTask getAllTasks={getAllTasks} />
           </div>
           <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
             <div className="flex justify-between">
@@ -475,7 +582,7 @@ const Week = () => {
               <Calendar className="size-4 mr-2 " />
               15.02
             </p>
-            <NewTask />
+            <NewTask getAllTasks={getAllTasks} />
           </div>
           <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
             <div className="flex justify-between">
@@ -518,7 +625,7 @@ const Week = () => {
               <Calendar className="size-4 mr-2 " />
               16.02
             </p>
-            <NewTask />
+            <NewTask getAllTasks={getAllTasks} />
           </div>
           <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
             <div className="flex justify-between">
@@ -561,7 +668,7 @@ const Week = () => {
               <Calendar className="size-4 mr-2 " />
               17.02
             </p>
-            <NewTask />
+            <NewTask getAllTasks={getAllTasks} />
           </div>
           <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
             <div className="flex justify-between">
@@ -604,7 +711,7 @@ const Week = () => {
               <Calendar className="size-4 mr-2 " />
               18.02
             </p>
-            <NewTask />
+            <NewTask getAllTasks={getAllTasks} />
           </div>
           <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
             <div className="flex justify-between">
@@ -647,265 +754,62 @@ const Week = () => {
   );
 };
 
-const All = () => {
+const All = ({ tasks, setTaskStatus }) => {
+  const allTasks = tasks.filter(
+    (task) => task.status === "todo" || task.status === "inProgress"
+  );
   return (
     <div className="bg-white w-full flex flex-wrap justify-center -mt-2 min-h-[750px] rounded-r-xl rounded-b-xl p-8 space-x-8">
-      <div className="w-80 bg-gray-50 drop-shadow rounded-xl h-48 p-4 mb-4">
-        <div className="flex justify-between">
-          <h3 className="font-semibold">Task title</h3>
-          <p className="text-gray-500 text-sm">07:09 - 08:23</p>
-        </div>
-        <div className="flex justify-between h-20">
-          <p className="w-56 text-sm">
-            Task description Task description Task description
-          </p>
-          <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
-          <p className="text-gray-500 h-10 text-sm flex items-center">+12°</p>
-        </div>
-        <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
-          <Button
-            variant=""
-            className="hover:bg-green-500 bg-green-600 shadow"
-            size="icon"
+      {allTasks.map((task, i) => {
+        const todo = task.status === "todo" ? true : false;
+        return (
+          <div
+            key={i}
+            className="w-80 bg-gray-50 drop-shadow rounded-xl h-48 p-4 mb-4"
           >
-            <Check className="size-6 " />
-          </Button>
-          <Button
-            variant="secondary"
-            className="hover:bg-yellow-400 bg-yellow-500 shadow"
-            size="icon"
-          >
-            <CircleDashed className="size-6 text-white" />
-          </Button>
-          <Button variant="destructive" className="shadow" size="icon">
-            <Trash2 className="size-6 " />
-          </Button>
-        </div>
-      </div>
-      <div className="w-80 bg-gray-50 drop-shadow rounded-xl h-48 p-4 mb-4">
-        <div className="flex justify-between">
-          <h3 className="font-semibold">Task title</h3>
-          <p className="text-gray-500 text-sm">07:09 - 08:23</p>
-        </div>
-        <div className="flex justify-between h-20">
-          <p className="w-56 text-sm">
-            Task description Task description Task description
-          </p>
-          <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
-          <p className="text-gray-500 h-10 text-sm flex items-center">+12°</p>
-        </div>
-        <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
-          <Button
-            variant=""
-            className="hover:bg-green-500 bg-green-600 shadow"
-            size="icon"
-          >
-            <Check className="size-6 " />
-          </Button>
-          <Button
-            variant="secondary"
-            className="hover:bg-yellow-400 bg-yellow-500 shadow"
-            size="icon"
-          >
-            <CircleDashed className="size-6 text-white" />
-          </Button>
-          <Button variant="destructive" className="shadow" size="icon">
-            <Trash2 className="size-6 " />
-          </Button>
-        </div>
-      </div>
-      <div className="w-80 bg-gray-50 drop-shadow rounded-xl h-48 p-4 mb-4">
-        <div className="flex justify-between">
-          <h3 className="font-semibold">Task title</h3>
-          <p className="text-gray-500 text-sm">07:09 - 08:23</p>
-        </div>
-        <div className="flex justify-between h-20">
-          <p className="w-56 text-sm">
-            Task description Task description Task description
-          </p>
-          <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
-          <p className="text-gray-500 h-10 text-sm flex items-center">+12°</p>
-        </div>
-        <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
-          <Button
-            variant=""
-            className="hover:bg-green-500 bg-green-600 shadow"
-            size="icon"
-          >
-            <Check className="size-6 " />
-          </Button>
-          <Button
-            variant="secondary"
-            className="hover:bg-yellow-400 bg-yellow-500 shadow"
-            size="icon"
-          >
-            <CircleDashed className="size-6 text-white" />
-          </Button>
-          <Button variant="destructive" className="shadow" size="icon">
-            <Trash2 className="size-6 " />
-          </Button>
-        </div>
-      </div>
-      <div className="w-80 bg-gray-50 drop-shadow rounded-xl h-48 p-4 mb-4">
-        <div className="flex justify-between">
-          <h3 className="font-semibold">Task title</h3>
-          <p className="text-gray-500 text-sm">07:09 - 08:23</p>
-        </div>
-        <div className="flex justify-between h-20">
-          <p className="w-56 text-sm">
-            Task description Task description Task description
-          </p>
-          <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
-          <p className="text-gray-500 h-10 text-sm flex items-center">+12°</p>
-        </div>
-        <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
-          <Button
-            variant=""
-            className="hover:bg-green-500 bg-green-600 shadow"
-            size="icon"
-          >
-            <Check className="size-6 " />
-          </Button>
-          <Button
-            variant="secondary"
-            className="hover:bg-yellow-400 bg-yellow-500 shadow"
-            size="icon"
-          >
-            <CircleDashed className="size-6 text-white" />
-          </Button>
-          <Button variant="destructive" className="shadow" size="icon">
-            <Trash2 className="size-6 " />
-          </Button>
-        </div>
-      </div>
-      <div className="w-80 bg-gray-50 drop-shadow rounded-xl h-48 p-4 mb-4">
-        <div className="flex justify-between">
-          <h3 className="font-semibold">Task title</h3>
-          <p className="text-gray-500 text-sm">07:09 - 08:23</p>
-        </div>
-        <div className="flex justify-between h-20">
-          <p className="w-56 text-sm">
-            Task description Task description Task description
-          </p>
-          <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
-          <p className="text-gray-500 h-10 text-sm flex items-center">+12°</p>
-        </div>
-        <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
-          <Button
-            variant=""
-            className="hover:bg-green-500 bg-green-600 shadow"
-            size="icon"
-          >
-            <Check className="size-6 " />
-          </Button>
-          <Button
-            variant="secondary"
-            className="hover:bg-yellow-400 bg-yellow-500 shadow"
-            size="icon"
-          >
-            <CircleDashed className="size-6 text-white" />
-          </Button>
-          <Button variant="destructive" className="shadow" size="icon">
-            <Trash2 className="size-6 " />
-          </Button>
-        </div>
-      </div>
-      <div className="w-80 bg-gray-50 drop-shadow rounded-xl h-48 p-4 mb-4">
-        <div className="flex justify-between">
-          <h3 className="font-semibold">Task title</h3>
-          <p className="text-gray-500 text-sm">07:09 - 08:23</p>
-        </div>
-        <div className="flex justify-between h-20">
-          <p className="w-56 text-sm">
-            Task description Task description Task description
-          </p>
-          <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
-          <p className="text-gray-500 h-10 text-sm flex items-center">+12°</p>
-        </div>
-        <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
-          <Button
-            variant=""
-            className="hover:bg-green-500 bg-green-600 shadow"
-            size="icon"
-          >
-            <Check className="size-6 " />
-          </Button>
-          <Button
-            variant="secondary"
-            className="hover:bg-yellow-400 bg-yellow-500 shadow"
-            size="icon"
-          >
-            <CircleDashed className="size-6 text-white" />
-          </Button>
-          <Button variant="destructive" className="shadow" size="icon">
-            <Trash2 className="size-6 " />
-          </Button>
-        </div>
-      </div>
-      <div className="w-80 bg-gray-50 drop-shadow rounded-xl h-48 p-4 mb-4">
-        <div className="flex justify-between">
-          <h3 className="font-semibold">Task title</h3>
-          <p className="text-gray-500 text-sm">07:09 - 08:23</p>
-        </div>
-        <div className="flex justify-between h-20">
-          <p className="w-56 text-sm">
-            Task description Task description Task description
-          </p>
-          <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
-          <p className="text-gray-500 h-10 text-sm flex items-center">+12°</p>
-        </div>
-        <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
-          <Button
-            variant=""
-            className="hover:bg-green-500 bg-green-600 shadow"
-            size="icon"
-          >
-            <Check className="size-6 " />
-          </Button>
-          <Button
-            variant="secondary"
-            className="hover:bg-yellow-400 bg-yellow-500 shadow"
-            size="icon"
-          >
-            <CircleDashed className="size-6 text-white" />
-          </Button>
-          <Button variant="destructive" className="shadow" size="icon">
-            <Trash2 className="size-6 " />
-          </Button>
-        </div>
-      </div>
-      <div className="w-80 bg-gray-50 drop-shadow rounded-xl h-48 p-4 mb-4">
-        <div className="flex justify-between">
-          <h3 className="font-semibold">Task title</h3>
-          <p className="text-gray-500 text-sm">07:09 - 08:23</p>
-        </div>
-        <div className="flex justify-between h-20">
-          <p className="w-56 text-sm">
-            Task description Task description Task description
-          </p>
-          <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
-          <p className="text-gray-500 h-10 text-sm flex items-center">+12°</p>
-        </div>
-        <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
-          <Button
-            variant=""
-            className="hover:bg-green-500 bg-green-600 shadow"
-            size="icon"
-          >
-            <Check className="size-6 " />
-          </Button>
-          <Button
-            variant="secondary"
-            className="hover:bg-yellow-400 bg-yellow-500 shadow"
-            size="icon"
-          >
-            <CircleDashed className="size-6 text-white" />
-          </Button>
-          <Button variant="destructive" className="shadow" size="icon">
-            <Trash2 className="size-6 " />
-          </Button>
-        </div>
-      </div>
+            <div className="flex justify-between">
+              <h3 className="font-semibold">{task.title}</h3>
+              <p className="text-gray-500 text-sm">
+                {task.timeStart}:00 - [...]
+              </p>
+            </div>
+            <div className="flex justify-between h-20">
+              <p className="w-56 text-sm">{task.description}</p>
+              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+              <p className="text-gray-500 h-10 text-sm flex items-center">
+                +12°
+              </p>
+            </div>
+            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+              <Button
+                variant=""
+                className="hover:bg-green-500 bg-green-600 shadow"
+                size="icon"
+                onClick={() => setTaskStatus(task.title, "done")}
+              >
+                <Check className="size-6 " />
+              </Button>
+              <Button
+                variant="secondary"
+                className="hover:bg-yellow-400 bg-yellow-500 shadow"
+                size="icon"
+                disabled={!todo}
+                onClick={() => setTaskStatus(task.title, "inProgress")}
+              >
+                <CircleDashed className="size-6 text-white" />
+              </Button>
+              <Button
+                variant="destructive"
+                className="shadow"
+                size="icon"
+                onClick={() => setTaskStatus(task.title, "deleted")}
+              >
+                <Trash2 className="size-6 " />
+              </Button>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };
