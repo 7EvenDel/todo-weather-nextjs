@@ -11,64 +11,93 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 
-const historyTasks = [
-  {
-    title: "Task title",
-    dateStart: "12-12-2012",
-    dateFinish: "12-12-2024",
-    category: "personal",
-    timeStart: "12:00",
-    timeFinish: "14:00",
-    description:
-      "Description of the task Description of the task Description of the task Description of the task",
-  },
-  {
-    title: "Task title",
-    dateStart: "12-12-2012",
-    dateFinish: "12-12-2024",
-    category: "work",
-    timeStart: "12:00",
-    timeFinish: "14:00",
-    description:
-      "Description of the task Description of the task Description of the task Description of the task",
-  },
-  {
-    title: "Task title",
-    dateStart: "12-12-2012",
-    dateFinish: "12-12-2024",
-    category: "study",
-    timeStart: "12:00",
-    timeFinish: "14:00",
-    description:
-      "Description of the task Description of the task Description of the task Description of the task",
-  },
-  {
-    title: "Task title",
-    dateStart: "12-12-2012",
-    dateFinish: "12-12-2024",
-    category: "personal",
-    timeStart: "12:00",
-    timeFinish: "14:00",
-    description:
-      "Description of the task Description of the task Description of the task Description of the task",
-  },
-  {
-    title: "Task title",
-    dateStart: "12-12-2012",
-    dateFinish: "12-12-2024",
-    category: "work",
-    timeStart: "12:00",
-    timeFinish: "14:00",
-    description:
-      "Description of the task Description of the task Description of the task Description of the task",
-  },
-];
+// const historyTasks = [
+//   {
+//     title: "Task title",
+//     dateStart: "12-12-2012",
+//     dateFinish: "12-12-2024",
+//     category: "personal",
+//     timeStart: "12:00",
+//     timeFinish: "14:00",
+//     description:
+//       "Description of the task Description of the task Description of the task Description of the task",
+//   },
+//   {
+//     title: "Task title",
+//     dateStart: "12-12-2012",
+//     dateFinish: "12-12-2024",
+//     category: "work",
+//     timeStart: "12:00",
+//     timeFinish: "14:00",
+//     description:
+//       "Description of the task Description of the task Description of the task Description of the task",
+//   },
+//   {
+//     title: "Task title",
+//     dateStart: "12-12-2012",
+//     dateFinish: "12-12-2024",
+//     category: "study",
+//     timeStart: "12:00",
+//     timeFinish: "14:00",
+//     description:
+//       "Description of the task Description of the task Description of the task Description of the task",
+//   },
+//   {
+//     title: "Task title",
+//     dateStart: "12-12-2012",
+//     dateFinish: "12-12-2024",
+//     category: "personal",
+//     timeStart: "12:00",
+//     timeFinish: "14:00",
+//     description:
+//       "Description of the task Description of the task Description of the task Description of the task",
+//   },
+//   {
+//     title: "Task title",
+//     dateStart: "12-12-2012",
+//     dateFinish: "12-12-2024",
+//     category: "work",
+//     timeStart: "12:00",
+//     timeFinish: "14:00",
+//     description:
+//       "Description of the task Description of the task Description of the task Description of the task",
+//   },
+// ];
 
 const History = () => {
   const session = useSession();
+  const [loading, setLoading] = useState(true);
+  const [tasks, setTasks] = useState([]);
 
-  if (session.status === "loading") {
+  const getAllTasks = async () => {
+    try {
+      setLoading(true);
+      // http://localhost:3000/api/tasks
+      // https://todo-weather.vercel.app/api/tasks
+      const res = await fetch(
+        `https://todo-weather.vercel.app/api/tasks?email=${session.data.user.email}`
+      );
+      if (!res.ok) {
+        throw new Error("failed to fetch");
+      }
+      const data = await res.json();
+      setTasks(data.tasks);
+      setLoading(false);
+    } catch (error) {
+      toast.warning("Couldn't get your tasks from server");
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (session.status === "authenticated") {
+      getAllTasks();
+    }
+  }, [session]);
+
+  if (session.status === "loading" || loading) {
     return (
       <Image
         className="mx-auto mt-40"
@@ -96,14 +125,25 @@ const History = () => {
       </div>
     );
   }
+
+  const historyTasks = tasks.filter(
+    (task) => task.status === "done" || task.status === "deleted"
+  );
+
   return (
     <section className="flex flex-col min-h-screen ">
       <ul className="">
         {historyTasks.map((el, i) => {
+          const startDate = new Date(el.dateStart);
+          const endDate = new Date(el.dateFinish);
           return (
             <li
               key={i}
-              className="w-full mt-4 h-32 bg-white hover:bg-green-50 transition duration-200 rounded-full flex items-center gap-8 px-8 drop-shadow"
+              className={
+                el.status === "done"
+                  ? "w-full mt-4 h-32 bg-white hover:bg-green-50 transition duration-200 rounded-full flex items-center gap-8 px-8 drop-shadow"
+                  : "w-full mt-4 h-32 bg-white hover:bg-red-50 transition duration-200 rounded-full flex items-center gap-8 px-8 drop-shadow"
+              }
             >
               {el.category === "personal" ? (
                 <Home className="size-10" />
@@ -114,24 +154,38 @@ const History = () => {
               )}
               <div className="w-44 h-full text-left flex flex-col justify-center gap-2">
                 <p className="text-gray-400">
-                  Started: <span className="text-black">{el.dateStart}</span>
+                  Started:{" "}
+                  <span className="text-black">
+                    {startDate.toLocaleDateString()}
+                  </span>
                 </p>
                 <p className="text-gray-400">
                   Finished:{" "}
-                  <span className="text-  black">{el.dateFinish}</span>
+                  <span className="text-black">
+                    {el.status === "done"
+                      ? endDate.toLocaleDateString()
+                      : "[...]"}
+                  </span>
                 </p>
               </div>
               <div className="w-20 h-full text-left flex flex-col justify-center gap-2">
                 <p className="text-gray-400">
-                  at <span className="text-black">{el.timeStart}</span>
+                  at <span className="text-black">{el.timeStart}:00</span>
                 </p>
                 <p className="text-gray-400">
-                  at <span className="text-black">{el.timeFinish}</span>
+                  at{" "}
+                  <span className="text-black">
+                    {el.status === "done" ? el.timeFinish : "[...]"}
+                  </span>
                 </p>
               </div>
               <div className="w-2/3 h-full text-left flex flex-col justify-center gap-2">
                 <p className="font-semibold flex gap-2 items-center">
-                  <CalendarCheck className="size-6 text-green-500" />
+                  {el.status === "done" ? (
+                    <CalendarCheck className="size-6 text-green-500" />
+                  ) : (
+                    <CalendarCheck className="size-6 text-red-500" />
+                  )}
                   {el.title}
                   <Badge variant="outline">{el.category}</Badge>
                 </p>

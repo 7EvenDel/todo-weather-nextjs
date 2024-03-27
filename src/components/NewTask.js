@@ -121,8 +121,8 @@ const NewTaskForm = ({ getAllTasks }) => {
   const onSubmit = async (data) => {
     const task = {
       ...data,
-      dateFinish: undefined,
-      timeFinish: undefined,
+      dateFinish: null,
+      timeFinish: null,
       status: "todo",
     };
     setLoading(true);
@@ -236,7 +236,8 @@ const NewTaskForm = ({ getAllTasks }) => {
                       selected={field.value}
                       onSelect={field.onChange}
                       disabled={(date) =>
-                        date < new Date() || date < new Date("1900-01-01")
+                        date < new Date(new Date().toDateString()) ||
+                        date < new Date("1900-01-01")
                       }
                       initialFocus
                     />

@@ -2,13 +2,14 @@
 
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Calendar,
   Check,
   CircleCheck,
   CircleDashed,
   CloudRain,
+  RefreshCw,
   StickyNote,
   Thermometer,
   Trash2,
@@ -28,41 +29,49 @@ const categories = [
 ];
 
 const MyTasks = () => {
-  const [category, setCategory] = useState("Personal");
+  const [category, setCategory] = useState("");
   const [loading, setLoading] = useState(false);
   const [tasks, setTasks] = useState([]);
+  const [allTasks, setAllTasks] = useState([]);
+
   const session = useSession();
 
-  const getAllTasks = async () => {
+  const getAllTasks = useCallback(async () => {
     try {
       setLoading(true);
+      setCategory("");
       // http://localhost:3000/api/tasks
       // https://todo-weather.vercel.app/api/tasks
       const res = await fetch(
-        `http://localhost:3000/api/tasks?email=${session.data.user.email}`
+        `https://todo-weather.vercel.app/api/tasks?email=${session.data.user.email}`
       );
       if (!res.ok) {
         throw new Error("failed to fetch");
       }
       const data = await res.json();
       setTasks(data.tasks);
+      setAllTasks(data.tasks);
       setLoading(false);
     } catch (error) {
       toast.warning("Couldn't get your tasks from server");
       setLoading(false);
     }
-  };
+  }, [session, setTasks]);
 
   const setTaskStatus = async (title, status) => {
     try {
       // http://localhost:3000/api/tasks
       // https://todo-weather.vercel.app/api/tasks
-      const res = await fetch("http://localhost:3000/api/tasks", {
+      const res = await fetch("https://todo-weather.vercel.app/api/tasks", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: session.data.user.email, title, status }),
+        body: JSON.stringify({
+          email: session.data.user.email,
+          title,
+          status,
+        }),
       });
       console.log(res);
 
@@ -78,11 +87,11 @@ const MyTasks = () => {
     }
   };
 
-  const registerBySocial = async () => {
+  const registerBySocial = useCallback(async () => {
     try {
       // http://localhost:3000/api/user
       // https://todo-weather.vercel.app/api/user
-      const res = await fetch("http://localhost:3000/api/user", {
+      const res = await fetch("https://todo-weather.vercel.app/api/user", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -96,14 +105,26 @@ const MyTasks = () => {
     } catch (error) {
       // console.log("User with this e-mail is already exists");
     }
-  };
+  }, [session]);
 
   useEffect(() => {
     if (session.status === "authenticated") {
       registerBySocial();
       getAllTasks();
     }
-  }, [session]);
+  }, [session, registerBySocial, getAllTasks]);
+
+  useEffect(() => {
+    if (category !== "") {
+      setTasks(() => {
+        return allTasks.filter((task) => {
+          console.log(category, task.category);
+
+          return task.category === category;
+        });
+      });
+    }
+  }, [category]);
 
   if (session.status === "loading" || loading) {
     return (
@@ -144,6 +165,9 @@ const MyTasks = () => {
             <NewTask getAllTasks={getAllTasks} />
           </div>
         </div>
+        <Button onClick={() => getAllTasks()} className="mt-6">
+          <RefreshCw className="size-5 mr-2" /> Refresh
+        </Button>
       </div>
     );
   }
@@ -230,7 +254,7 @@ const Day = ({ tasks, loading, getAllTasks, setTaskStatus }) => {
   const today = new Date();
   const todayTasks = tasks.filter((task) => {
     const taskDate = new Date(task.dateStart);
-    taskDate.setDate(taskDate.getDate() - 1);
+    taskDate.setDate(taskDate.getDate());
     const isToday =
       taskDate.getDate() === today.getDate() &&
       taskDate.getMonth() === today.getMonth() &&
@@ -435,322 +459,92 @@ const Day = ({ tasks, loading, getAllTasks, setTaskStatus }) => {
 
 const Week = ({ tasks, getAllTasks, setTaskStatus }) => {
   const currentDate = new Date();
-
   const nextWeekDate = new Date(currentDate);
   nextWeekDate.setDate(currentDate.getDate() + 7);
 
-  const tasksForNextWeek = tasks.filter((task) => {
-    const taskDate = new Date(task.dateStart);
-    return taskDate >= currentDate && taskDate < nextWeekDate;
-  });
+  const daysOfWeek = [];
+  const oneDay = 24 * 60 * 60 * 1000;
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(currentDate.getTime() + i * oneDay);
+    daysOfWeek.push(date);
+  }
 
   return (
     <ScrollArea className="bg-white -mt-2 min-h-[750px] rounded-r-xl w-[1176px] rounded-b-xl p-8">
       <div className="flex justify-between gap-16">
-        <div className="w-80">
-          <div className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold justify-between">
-            <p className="flex items-center">
-              <Calendar className="size-4 mr-2 " />
-              12.02
-            </p>
-            <NewTask getAllTasks={getAllTasks} />
-          </div>
-          <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
-            <div className="flex justify-between">
-              <h3 className="font-semibold">Task title</h3>
-              <p className="text-gray-500 text-sm">07:09 - 08:23</p>
-            </div>
-            <div className="flex justify-between ">
-              <p className="w-56 text-sm">
-                Task description Task description Task description
+        {daysOfWeek.map((day, index) => (
+          <div key={index} className="w-80">
+            <div className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold justify-between">
+              <p className="flex items-center">
+                <Calendar className="size-4 mr-2 " />
+                {day.toLocaleDateString()}
               </p>
-              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
-              <p className="text-gray-500 h-10 text-sm flex items-center">
-                +12°
-              </p>
+              <NewTask getAllTasks={getAllTasks} />
             </div>
-            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
-              <Button
-                variant=""
-                className="hover:bg-green-500 bg-green-600 shadow"
-                size="icon"
-              >
-                <Check className="size-6 " />
-              </Button>
-              <Button
-                variant="secondary"
-                className="hover:bg-yellow-400 bg-yellow-500 shadow"
-                size="icon"
-              >
-                <CircleDashed className="size-6 text-white" />
-              </Button>
-              <Button variant="destructive" className="shadow" size="icon">
-                <Trash2 className="size-6 " />
-              </Button>
-            </div>
+            {tasks
+              .filter(
+                (task) =>
+                  new Date(task.dateStart).toLocaleDateString() ===
+                    day.toLocaleDateString() && task.status !== "deleted"
+              )
+              .map((task, i) => (
+                <TaskItem key={i} task={task} setTaskStatus={setTaskStatus} />
+              ))}
           </div>
-        </div>
-        <div className="w-80">
-          <div className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold justify-between">
-            <p className="flex items-center">
-              <Calendar className="size-4 mr-2 " />
-              13.02
-            </p>
-            <NewTask getAllTasks={getAllTasks} />
-          </div>
-          <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
-            <div className="flex justify-between">
-              <h3 className="font-semibold">Task title</h3>
-              <p className="text-gray-500 text-sm">07:09 - 08:23</p>
-            </div>
-            <div className="flex justify-between ">
-              <p className="w-56 text-sm">
-                Task description Task description Task description
-              </p>
-              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
-              <p className="text-gray-500 h-10 text-sm flex items-center">
-                +12°
-              </p>
-            </div>
-            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
-              <Button
-                variant=""
-                className="hover:bg-green-500 bg-green-600 shadow"
-                size="icon"
-              >
-                <Check className="size-6 " />
-              </Button>
-              <Button
-                variant="secondary"
-                className="hover:bg-yellow-400 bg-yellow-500 shadow"
-                size="icon"
-              >
-                <CircleDashed className="size-6 text-white" />
-              </Button>
-              <Button variant="destructive" className="shadow" size="icon">
-                <Trash2 className="size-6 " />
-              </Button>
-            </div>
-          </div>
-        </div>
-        <div className="w-80">
-          <div className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold justify-between">
-            <p className="flex items-center">
-              <Calendar className="size-4 mr-2 " />
-              14.02
-            </p>
-            <NewTask getAllTasks={getAllTasks} />
-          </div>
-          <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
-            <div className="flex justify-between">
-              <h3 className="font-semibold">Task title</h3>
-              <p className="text-gray-500 text-sm">07:09 - 08:23</p>
-            </div>
-            <div className="flex justify-between ">
-              <p className="w-56 text-sm">
-                Task description Task description Task description
-              </p>
-              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
-              <p className="text-gray-500 h-10 text-sm flex items-center">
-                +12°
-              </p>
-            </div>
-            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
-              <Button
-                variant=""
-                className="hover:bg-green-500 bg-green-600 shadow"
-                size="icon"
-              >
-                <Check className="size-6 " />
-              </Button>
-              <Button
-                variant="secondary"
-                className="hover:bg-yellow-400 bg-yellow-500 shadow"
-                size="icon"
-              >
-                <CircleDashed className="size-6 text-white" />
-              </Button>
-              <Button variant="destructive" className="shadow" size="icon">
-                <Trash2 className="size-6 " />
-              </Button>
-            </div>
-          </div>
-        </div>
-        <div className="w-80">
-          <div className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold justify-between">
-            <p className="flex items-center">
-              <Calendar className="size-4 mr-2 " />
-              15.02
-            </p>
-            <NewTask getAllTasks={getAllTasks} />
-          </div>
-          <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
-            <div className="flex justify-between">
-              <h3 className="font-semibold">Task title</h3>
-              <p className="text-gray-500 text-sm">07:09 - 08:23</p>
-            </div>
-            <div className="flex justify-between ">
-              <p className="w-56 text-sm">
-                Task description Task description Task description
-              </p>
-              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
-              <p className="text-gray-500 h-10 text-sm flex items-center">
-                +12°
-              </p>
-            </div>
-            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
-              <Button
-                variant=""
-                className="hover:bg-green-500 bg-green-600 shadow"
-                size="icon"
-              >
-                <Check className="size-6 " />
-              </Button>
-              <Button
-                variant="secondary"
-                className="hover:bg-yellow-400 bg-yellow-500 shadow"
-                size="icon"
-              >
-                <CircleDashed className="size-6 text-white" />
-              </Button>
-              <Button variant="destructive" className="shadow" size="icon">
-                <Trash2 className="size-6 " />
-              </Button>
-            </div>
-          </div>
-        </div>
-        <div className="w-80">
-          <div className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold justify-between">
-            <p className="flex items-center">
-              <Calendar className="size-4 mr-2 " />
-              16.02
-            </p>
-            <NewTask getAllTasks={getAllTasks} />
-          </div>
-          <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
-            <div className="flex justify-between">
-              <h3 className="font-semibold">Task title</h3>
-              <p className="text-gray-500 text-sm">07:09 - 08:23</p>
-            </div>
-            <div className="flex justify-between ">
-              <p className="w-56 text-sm">
-                Task description Task description Task description
-              </p>
-              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
-              <p className="text-gray-500 h-10 text-sm flex items-center">
-                +12°
-              </p>
-            </div>
-            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
-              <Button
-                variant=""
-                className="hover:bg-green-500 bg-green-600 shadow"
-                size="icon"
-              >
-                <Check className="size-6 " />
-              </Button>
-              <Button
-                variant="secondary"
-                className="hover:bg-yellow-400 bg-yellow-500 shadow"
-                size="icon"
-              >
-                <CircleDashed className="size-6 text-white" />
-              </Button>
-              <Button variant="destructive" className="shadow" size="icon">
-                <Trash2 className="size-6 " />
-              </Button>
-            </div>
-          </div>
-        </div>
-        <div className="w-80">
-          <div className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold justify-between">
-            <p className="flex items-center">
-              <Calendar className="size-4 mr-2 " />
-              17.02
-            </p>
-            <NewTask getAllTasks={getAllTasks} />
-          </div>
-          <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
-            <div className="flex justify-between">
-              <h3 className="font-semibold">Task title</h3>
-              <p className="text-gray-500 text-sm">07:09 - 08:23</p>
-            </div>
-            <div className="flex justify-between ">
-              <p className="w-56 text-sm">
-                Task description Task description Task description
-              </p>
-              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
-              <p className="text-gray-500 h-10 text-sm flex items-center">
-                +12°
-              </p>
-            </div>
-            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
-              <Button
-                variant=""
-                className="hover:bg-green-500 bg-green-600 shadow"
-                size="icon"
-              >
-                <Check className="size-6 " />
-              </Button>
-              <Button
-                variant="secondary"
-                className="hover:bg-yellow-400 bg-yellow-500 shadow"
-                size="icon"
-              >
-                <CircleDashed className="size-6 text-white" />
-              </Button>
-              <Button variant="destructive" className="shadow" size="icon">
-                <Trash2 className="size-6 " />
-              </Button>
-            </div>
-          </div>
-        </div>
-        <div className="w-80">
-          <div className="p-4 bg-gray-50 rounded-xl flex items-center drop-shadow w-full mb-4 font-semibold justify-between">
-            <p className="flex items-center">
-              <Calendar className="size-4 mr-2 " />
-              18.02
-            </p>
-            <NewTask getAllTasks={getAllTasks} />
-          </div>
-          <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
-            <div className="flex justify-between">
-              <h3 className="font-semibold">Task title</h3>
-              <p className="text-gray-500 text-sm">07:09 - 08:23</p>
-            </div>
-            <div className="flex justify-between ">
-              <p className="w-56 text-sm">
-                Task description Task description Task description
-              </p>
-              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
-              <p className="text-gray-500 h-10 text-sm flex items-center">
-                +12°
-              </p>
-            </div>
-            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
-              <Button
-                variant=""
-                className="hover:bg-green-500 bg-green-600 shadow"
-                size="icon"
-              >
-                <Check className="size-6 " />
-              </Button>
-              <Button
-                variant="secondary"
-                className="hover:bg-yellow-400 bg-yellow-500 shadow"
-                size="icon"
-              >
-                <CircleDashed className="size-6 text-white" />
-              </Button>
-              <Button variant="destructive" className="shadow" size="icon">
-                <Trash2 className="size-6 " />
-              </Button>
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
       <ScrollBar orientation="horizontal" />
     </ScrollArea>
+  );
+};
+
+const TaskItem = ({ task, setTaskStatus }) => {
+  const startDate = new Date(task.dateStart);
+  const endDate = new Date(task.dateFinish);
+
+  return (
+    <div className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4">
+      <div className="flex justify-between">
+        <h3 className="font-semibold">{task.title}</h3>
+        <p className="text-gray-500 text-sm">
+          {startDate.toLocaleDateString()} -{" "}
+          {task.status === "done" ? endDate.toLocaleDateString() : "[...]"}
+        </p>
+      </div>
+      <div className="flex justify-between ">
+        <p className="w-56 text-sm">{task.description}</p>
+        <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+        <p className="text-gray-500 h-10 text-sm flex items-center">+12°</p>
+      </div>
+      <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+        <Button
+          variant=""
+          className="hover:bg-green-500 bg-green-600 shadow"
+          disabled={task.status === "done"}
+          onClick={() => setTaskStatus(task.title, "done")}
+          size="icon"
+        >
+          <Check className="size-6 " />
+        </Button>
+        <Button
+          variant="secondary"
+          className="hover:bg-yellow-400 bg-yellow-500 shadow"
+          size="icon"
+          onClick={() => setTaskStatus(task.title, "inProgress")}
+          disabled={task.status === "inProgress"}
+        >
+          <CircleDashed className="size-6 text-white" />
+        </Button>
+        <Button
+          variant="destructive"
+          className="shadow"
+          size="icon"
+          onClick={() => setTaskStatus(task.title, "deleted")}
+        >
+          <Trash2 className="size-6 " />
+        </Button>
+      </div>
+    </div>
   );
 };
 
