@@ -131,7 +131,7 @@ const NewTaskForm = ({ getAllTasks }) => {
       // http://localhost:3000/api/user
       // https://todo-weather.vercel.app/api/user
 
-      const res = await fetch("http://localhost:3000/api/tasks", {
+      const res = await fetch("https://todo-weather.vercel.app/api/tasks", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
