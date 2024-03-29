@@ -56,7 +56,7 @@ const Weather = () => {
     );
   }
   const today = new Date();
-  let daysOfWeek = [
+  const daysOfWeek = [
     "Sunday",
     "Monday",
     "Tuesday",

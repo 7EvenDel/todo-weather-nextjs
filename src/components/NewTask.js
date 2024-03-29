@@ -147,7 +147,6 @@ const NewTaskForm = ({ getAllTasks }) => {
     } catch (error) {
       toast.warning("Could not add your task.");
       setLoading(false);
-      getAllTasks();
     }
   };
 

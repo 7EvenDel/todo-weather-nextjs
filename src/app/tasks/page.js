@@ -33,6 +33,7 @@ const MyTasks = () => {
   const [loading, setLoading] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [allTasks, setAllTasks] = useState([]);
+  const [weatherData, setWeatherData] = useState([]);
 
   const session = useSession();
 
@@ -58,6 +59,30 @@ const MyTasks = () => {
     }
   }, [session, setTasks]);
 
+  const fetchWeatherData = async () => {
+    const apiKey = "ddd15989a3070c6066643bfde289965b";
+    const apiUrl = `https://api.openweathermap.org/data/2.5/forecast?q=kyiv&appid=${apiKey}`;
+    setLoading(true);
+    try {
+      const response = await fetch(apiUrl);
+      if (!response.ok) {
+        toast.warning("Could not find this location");
+        throw new Error("Failed to fetch weather data");
+      }
+      const data = await response.json();
+      let weather = [];
+      for (let i = 0; i <= 40; i += 6) {
+        weather.push(data.list[i]);
+      }
+      console.log(weather);
+      setWeatherData(weather);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching weather data:", error);
+      setLoading(false);
+    }
+  };
+
   const setTaskStatus = async (title, status) => {
     try {
       // http://localhost:3000/api/tasks
@@ -73,11 +98,8 @@ const MyTasks = () => {
           status,
         }),
       });
-      console.log(res);
 
       if (!res.ok) {
-        console.log("asdkjlasdjklaklds");
-
         throw new Error("failed to fetch");
       }
       toast.success("Updated!");
@@ -102,12 +124,11 @@ const MyTasks = () => {
         throw new Error("failed to fetch");
       }
       console.log("account has been created");
-    } catch (error) {
-      // console.log("User with this e-mail is already exists");
-    }
+    } catch (error) {}
   }, [session]);
 
   useEffect(() => {
+    fetchWeatherData();
     if (session.status === "authenticated") {
       registerBySocial();
       getAllTasks();
@@ -118,8 +139,6 @@ const MyTasks = () => {
     if (category !== "") {
       setTasks(() => {
         return allTasks.filter((task) => {
-          console.log(category, task.category);
-
           return task.category === category;
         });
       });
@@ -227,6 +246,7 @@ const MyTasks = () => {
             loading={loading}
             getAllTasks={getAllTasks}
             setTaskStatus={setTaskStatus}
+            weatherData={weatherData[0]}
           />
         </TabsContent>
         <TabsContent value="week" className="w-full">
@@ -235,6 +255,7 @@ const MyTasks = () => {
             loading={loading}
             getAllTasks={getAllTasks}
             setTaskStatus={setTaskStatus}
+            weatherData={weatherData}
           />
         </TabsContent>
         <TabsContent value="all" className="w-full">
@@ -243,6 +264,7 @@ const MyTasks = () => {
             loading={loading}
             getAllTasks={getAllTasks}
             setTaskStatus={setTaskStatus}
+            weatherData={weatherData}
           />
         </TabsContent>
       </Tabs>
@@ -250,15 +272,32 @@ const MyTasks = () => {
   );
 };
 
-const Day = ({ tasks, loading, getAllTasks, setTaskStatus }) => {
+const Day = ({ tasks, weatherData, getAllTasks, setTaskStatus }) => {
+  const session = useSession();
   const today = new Date();
+  const monthsOfYear = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
   const todayTasks = tasks.filter((task) => {
     const taskDate = new Date(task.dateStart);
     taskDate.setDate(taskDate.getDate());
     const isToday =
       taskDate.getDate() === today.getDate() &&
       taskDate.getMonth() === today.getMonth() &&
-      taskDate.getFullYear() === today.getFullYear();
+      taskDate.getFullYear() === today.getFullYear() &&
+      task.status !== "deleted";
     return isToday;
   });
   const todoTasks = todayTasks.filter((task) => task.status === "todo");
@@ -267,17 +306,30 @@ const Day = ({ tasks, loading, getAllTasks, setTaskStatus }) => {
   );
   const doneTasks = todayTasks.filter((task) => task.status === "done");
 
+  if (todayTasks.length < 1) {
+    return (
+      <div className="bg-white w-full -mt-2 min-h-[750px] rounded-r-xl rounded-b-xl p-8 flex flex-col items-center justify-center">
+        <h2 className="text-2xl">You have no tasks for today</h2>
+        <div className="flex items-center">
+          <p className="mt-1 mr-1">Want to add some?</p>
+          <NewTask getAllTasks={getAllTasks} />
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="bg-white w-full -mt-2 min-h-[750px] rounded-r-xl rounded-b-xl p-8">
       <div className="flex justify-between">
         <div className="">
-          <p className="">Hello Artur!</p>
+          <p className="">Hello, {session?.data.user.name}!</p>
           <p className="">We wish you a productive day.</p>
         </div>
         <div className="">
-          <p className="">12th January</p>
+          <p className="">
+            {monthsOfYear[today.getMonth()]} {today.getDate()}
+          </p>
           <p className="flex items-center">
-            Temperature +34
+            Temperature {(weatherData.main.temp - 273.15).toFixed(1)}°C
             <Thermometer className="size-5" />
           </p>
         </div>
@@ -305,9 +357,13 @@ const Day = ({ tasks, loading, getAllTasks, setTaskStatus }) => {
                 </div>
                 <div className="flex justify-between ">
                   <p className="w-56 text-sm">{task.description}</p>
-                  <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+                  <img
+                    alt={weatherData.weather[0].main}
+                    src={`https://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png`}
+                    className="size-14 -my-2"
+                  />
                   <p className="text-gray-500 h-10 text-sm flex items-center">
-                    +12°
+                    {(weatherData.main.temp - 273.15).toFixed(1)}°C
                   </p>
                 </div>
                 <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
@@ -361,9 +417,13 @@ const Day = ({ tasks, loading, getAllTasks, setTaskStatus }) => {
                 </div>
                 <div className="flex justify-between ">
                   <p className="w-56 text-sm">{task.description}</p>
-                  <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+                  <img
+                    alt={weatherData.weather[0].main}
+                    src={`https://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png`}
+                    className="size-14 -my-2"
+                  />
                   <p className="text-gray-500 h-10 text-sm flex items-center">
-                    +12°
+                    {(weatherData.main.temp - 273.15).toFixed(1)}°C
                   </p>
                 </div>
                 <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
@@ -417,9 +477,13 @@ const Day = ({ tasks, loading, getAllTasks, setTaskStatus }) => {
                 </div>
                 <div className="flex justify-between ">
                   <p className="w-56 text-sm">{task.description}</p>
-                  <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
+                  <img
+                    alt={weatherData.weather[0].main}
+                    src={`https://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png`}
+                    className="size-14 -my-2"
+                  />
                   <p className="text-gray-500 h-10 text-sm flex items-center">
-                    +12°
+                    {(weatherData.main.temp - 273.15).toFixed(1)}°C
                   </p>
                 </div>
                 <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
@@ -457,7 +521,7 @@ const Day = ({ tasks, loading, getAllTasks, setTaskStatus }) => {
   );
 };
 
-const Week = ({ tasks, getAllTasks, setTaskStatus }) => {
+const Week = ({ tasks, getAllTasks, setTaskStatus, weatherData }) => {
   const currentDate = new Date();
   const nextWeekDate = new Date(currentDate);
   nextWeekDate.setDate(currentDate.getDate() + 7);
@@ -488,7 +552,12 @@ const Week = ({ tasks, getAllTasks, setTaskStatus }) => {
                     day.toLocaleDateString() && task.status !== "deleted"
               )
               .map((task, i) => (
-                <TaskItem key={i} task={task} setTaskStatus={setTaskStatus} />
+                <TaskItem
+                  key={i}
+                  task={task}
+                  setTaskStatus={setTaskStatus}
+                  weatherData={weatherData[index]}
+                />
               ))}
           </div>
         ))}
@@ -498,7 +567,7 @@ const Week = ({ tasks, getAllTasks, setTaskStatus }) => {
   );
 };
 
-const TaskItem = ({ task, setTaskStatus }) => {
+const TaskItem = ({ task, setTaskStatus, weatherData }) => {
   const startDate = new Date(task.dateStart);
   const endDate = new Date(task.dateFinish);
 
@@ -513,8 +582,14 @@ const TaskItem = ({ task, setTaskStatus }) => {
       </div>
       <div className="flex justify-between ">
         <p className="w-56 text-sm">{task.description}</p>
-        <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
-        <p className="text-gray-500 h-10 text-sm flex items-center">+12°</p>
+        <img
+          alt={weatherData.weather[0].main}
+          src={`https://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png`}
+          className="size-14 -my-2"
+        />
+        <p className="text-gray-500 h-10 text-sm flex items-center">
+          {(weatherData.main.temp - 273.15).toFixed(1)}°C
+        </p>
       </div>
       <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
         <Button
@@ -559,7 +634,11 @@ const All = ({ tasks, setTaskStatus }) => {
         return (
           <div
             key={i}
-            className="w-80 bg-gray-50 drop-shadow rounded-xl h-48 p-4 mb-4"
+            className={
+              todo
+                ? "w-80 bg-blue-50 drop-shadow rounded-xl h-40 p-4"
+                : "w-80 bg-yellow-50 drop-shadow rounded-xl h-40 p-4"
+            }
           >
             <div className="flex justify-between">
               <h3 className="font-semibold">{task.title}</h3>
@@ -569,12 +648,11 @@ const All = ({ tasks, setTaskStatus }) => {
             </div>
             <div className="flex justify-between h-20">
               <p className="w-56 text-sm">{task.description}</p>
-              <CloudRain className="mx-auto px-2 w-10 h-10 flex items-center" />
               <p className="text-gray-500 h-10 text-sm flex items-center">
-                +12°
+                {todo ? "To Do" : "In progress"}
               </p>
             </div>
-            <div className="flex justify-end items-end w-full h-10 mt-4 gap-2">
+            <div className="flex justify-end items-end w-full h-10 -mt-4 gap-2">
               <Button
                 variant=""
                 className="hover:bg-green-500 bg-green-600 shadow"
