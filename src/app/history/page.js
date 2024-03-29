@@ -12,59 +12,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-
-// const historyTasks = [
-//   {
-//     title: "Task title",
-//     dateStart: "12-12-2012",
-//     dateFinish: "12-12-2024",
-//     category: "personal",
-//     timeStart: "12:00",
-//     timeFinish: "14:00",
-//     description:
-//       "Description of the task Description of the task Description of the task Description of the task",
-//   },
-//   {
-//     title: "Task title",
-//     dateStart: "12-12-2012",
-//     dateFinish: "12-12-2024",
-//     category: "work",
-//     timeStart: "12:00",
-//     timeFinish: "14:00",
-//     description:
-//       "Description of the task Description of the task Description of the task Description of the task",
-//   },
-//   {
-//     title: "Task title",
-//     dateStart: "12-12-2012",
-//     dateFinish: "12-12-2024",
-//     category: "study",
-//     timeStart: "12:00",
-//     timeFinish: "14:00",
-//     description:
-//       "Description of the task Description of the task Description of the task Description of the task",
-//   },
-//   {
-//     title: "Task title",
-//     dateStart: "12-12-2012",
-//     dateFinish: "12-12-2024",
-//     category: "personal",
-//     timeStart: "12:00",
-//     timeFinish: "14:00",
-//     description:
-//       "Description of the task Description of the task Description of the task Description of the task",
-//   },
-//   {
-//     title: "Task title",
-//     dateStart: "12-12-2012",
-//     dateFinish: "12-12-2024",
-//     category: "work",
-//     timeStart: "12:00",
-//     timeFinish: "14:00",
-//     description:
-//       "Description of the task Description of the task Description of the task Description of the task",
-//   },
-// ];
+import { motion } from "framer-motion";
 
 const History = () => {
   const session = useSession();
@@ -111,7 +59,12 @@ const History = () => {
 
   if (session.status === "unauthenticated") {
     return (
-      <div className="text-center w-full mt-40">
+      <motion.div
+        className="text-center w-full mt-40"
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         <h1 className="text-2xl">Here is nothing we can show you.</h1>
         <p className="text-lg">
           May be you want to{" "}
@@ -122,7 +75,7 @@ const History = () => {
           </Link>
           ?
         </p>
-      </div>
+      </motion.div>
     );
   }
 
@@ -137,12 +90,15 @@ const History = () => {
           const startDate = new Date(el.dateStart);
           const endDate = new Date(el.dateFinish);
           return (
-            <li
+            <motion.li
+              initial={{ opacity: 0, translateX: 1000 }}
+              animate={{ opacity: 1, translateX: 0 }}
+              transition={{ duration: 0.7, delay: i / 5 }}
               key={i}
               className={
                 el.status === "done"
-                  ? "w-full mt-4 h-32 bg-white hover:bg-green-50 transition duration-200 rounded-full flex items-center gap-8 px-8 drop-shadow"
-                  : "w-full mt-4 h-32 bg-white hover:bg-red-50 transition duration-200 rounded-full flex items-center gap-8 px-8 drop-shadow"
+                  ? "w-full mt-4 h-32 bg-white hover:bg-green-50 rounded-full flex items-center gap-8 px-8 drop-shadow"
+                  : "w-full mt-4 h-32 bg-white hover:bg-red-50 rounded-full flex items-center gap-8 px-8 drop-shadow"
               }
             >
               {el.category === "personal" ? (
@@ -191,7 +147,7 @@ const History = () => {
                 </p>
                 <p className="text-gray-400">{el.description}</p>
               </div>
-            </li>
+            </motion.li>
           );
         })}
       </ul>

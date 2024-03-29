@@ -14,6 +14,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Cog } from "lucide-react";
+import { motion } from "framer-motion";
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
@@ -104,7 +105,12 @@ const Auth = () => {
           </p>
         </>
       ) : (
-        <div className="w-[554px] h-[669px] flex flex-col">
+        <motion.div
+          className="w-[554px] h-[669px] flex flex-col"
+          initial={{ opacity: 0, translateY: 100 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           {login ? (
             <>
               <h1 className="font-bold text-[32px]">Welcome Back</h1>
@@ -285,7 +291,7 @@ const Auth = () => {
               <p>Continue with Facebook</p>
             </Button>
           </form>
-        </div>
+        </motion.div>
       )}
     </section>
   );

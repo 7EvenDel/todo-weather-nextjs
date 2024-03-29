@@ -7,6 +7,7 @@ import { Separator } from "../../components/ui/separator";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 const Weather = () => {
   const [location, setLocation] = useState("London");
@@ -68,7 +69,12 @@ const Weather = () => {
 
   return (
     <section className="flex flex-col min-h-screen pt-8">
-      <div className="flex gap-4 w-full rounded-full bg-white mb-4">
+      <motion.div
+        className="flex gap-4 w-full rounded-full bg-white mb-4"
+        initial={{ opacity: 0, translateY: -200 }}
+        animate={{ opacity: 1, scale: 1, translateY: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="w-96 items-center  flex flex-col drop-shadow py-4">
           <p className="text-[32px]">{location.name}</p>
           <p className="text-[18px]">
@@ -115,9 +121,14 @@ const Weather = () => {
             })}
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="flex justify-between my-4">
+      <motion.div
+        className="flex justify-between my-4"
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="items-center flex flex-col">
           <p className="">Chance of Rain</p>
           <p className="font-semibold">{todayWeather[0].pop * 100}%</p>
@@ -140,19 +151,25 @@ const Weather = () => {
           <p className="">Pressure</p>
           <p className="font-semibold">{todayWeather[0].main.pressure} hPa</p>
         </div>
-      </div>
+      </motion.div>
       <Separator className="bg-gray-400" />
       <div className="flex flex-wrap w-full justify-center space-x-12">
         {weatherData.map((el, i) => {
           let date = new Date();
           date.setDate(date.getDate() + i);
           return (
-            <WeatherCard
+            <motion.div
               key={i}
-              weatherData={el}
-              cityName={location.name}
-              date={date}
-            />
+              initial={{ opacity: 0, scale: 0.5, translateY: 100 }}
+              animate={{ opacity: 1, scale: 1, translateY: 0 }}
+              transition={{ duration: i / 5 }}
+            >
+              <WeatherCard
+                weatherData={el}
+                cityName={location.name}
+                date={date}
+              />
+            </motion.div>
           );
         })}
       </div>

@@ -21,6 +21,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
 import NewTask from "@/components/NewTask";
+import { motion } from "framer-motion";
 
 const categories = [
   { label: "Personal", value: "personal" },
@@ -219,10 +220,13 @@ const MyTasks = () => {
               All my tasks
             </TabsTrigger>
             <div className="mt-28 flex-col flex h-40 bg-gray-100 rounded-l-xl">
-              {categories.map((el) => {
+              {categories.map((el, i) => {
                 return (
-                  <button
+                  <motion.button
                     key={el.value}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5, delay: i / 2 }}
                     onClick={() => {
                       setCategory(el.value),
                         toast.info("Current category: " + el.label);
@@ -234,7 +238,7 @@ const MyTasks = () => {
                     }
                   >
                     {el.label}
-                  </button>
+                  </motion.button>
                 );
               })}
             </div>
@@ -345,7 +349,10 @@ const Day = ({ tasks, weatherData, getAllTasks, setTaskStatus }) => {
           </div>
           {todoTasks.map((task, i) => {
             return (
-              <div
+              <motion.div
+                initial={{ opacity: 0, translateY: 100 }}
+                animate={{ opacity: 1, translateY: 0 }}
+                transition={{ duration: 0.5, delay: i / 2 }}
                 key={i}
                 className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4"
               >
@@ -392,7 +399,7 @@ const Day = ({ tasks, weatherData, getAllTasks, setTaskStatus }) => {
                     <Trash2 className="size-6 " />
                   </Button>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
@@ -405,7 +412,10 @@ const Day = ({ tasks, weatherData, getAllTasks, setTaskStatus }) => {
           </div>
           {inProgressTasks.map((task, i) => {
             return (
-              <div
+              <motion.div
+                initial={{ opacity: 0, translateY: 100 }}
+                animate={{ opacity: 1, translateY: 0 }}
+                transition={{ duration: 0.5, delay: i / 2 }}
                 key={i}
                 className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4"
               >
@@ -452,7 +462,7 @@ const Day = ({ tasks, weatherData, getAllTasks, setTaskStatus }) => {
                     <Trash2 className="size-6 " />
                   </Button>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
@@ -465,7 +475,10 @@ const Day = ({ tasks, weatherData, getAllTasks, setTaskStatus }) => {
           </div>
           {doneTasks.map((task, i) => {
             return (
-              <div
+              <motion.div
+                initial={{ opacity: 0, translateY: 100 }}
+                animate={{ opacity: 1, translateY: 0 }}
+                transition={{ duration: 0.5, delay: i / 2 }}
                 key={i}
                 className="w-full bg-gray-50 drop-shadow rounded-xl min-h-36 p-4 mb-4"
               >
@@ -512,7 +525,7 @@ const Day = ({ tasks, weatherData, getAllTasks, setTaskStatus }) => {
                     <Trash2 className="size-6 " />
                   </Button>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
@@ -552,12 +565,18 @@ const Week = ({ tasks, getAllTasks, setTaskStatus, weatherData }) => {
                     day.toLocaleDateString() && task.status !== "deleted"
               )
               .map((task, i) => (
-                <TaskItem
+                <motion.div
                   key={i}
-                  task={task}
-                  setTaskStatus={setTaskStatus}
-                  weatherData={weatherData[index]}
-                />
+                  initial={{ opacity: 0, translateY: 100 }}
+                  animate={{ opacity: 1, translateY: 0 }}
+                  transition={{ duration: 0.5, delay: i / 2 }}
+                >
+                  <TaskItem
+                    task={task}
+                    setTaskStatus={setTaskStatus}
+                    weatherData={weatherData[index]}
+                  />
+                </motion.div>
               ))}
           </div>
         ))}
@@ -632,7 +651,10 @@ const All = ({ tasks, setTaskStatus }) => {
       {allTasks.map((task, i) => {
         const todo = task.status === "todo" ? true : false;
         return (
-          <div
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: i / 5 }}
             key={i}
             className={
               todo
@@ -679,7 +701,7 @@ const All = ({ tasks, setTaskStatus }) => {
                 <Trash2 className="size-6 " />
               </Button>
             </div>
-          </div>
+          </motion.div>
         );
       })}
     </div>
