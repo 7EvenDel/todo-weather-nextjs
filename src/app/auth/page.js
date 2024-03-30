@@ -86,7 +86,6 @@ const Auth = () => {
       }
     }
   };
-  console.log(session);
   return (
     <section className="flex flex-col items-center mt-[103px] bg-cover">
       {session?.status === "authenticated" ? (

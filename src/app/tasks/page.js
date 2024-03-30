@@ -75,7 +75,6 @@ const MyTasks = () => {
       for (let i = 0; i <= 40; i += 6) {
         weather.push(data.list[i]);
       }
-      console.log(weather);
       setWeatherData(weather);
       setLoading(false);
     } catch (error) {

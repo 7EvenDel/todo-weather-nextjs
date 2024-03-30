@@ -32,7 +32,6 @@ const Weather = () => {
       for (let i = 0; i <= 40; i += 6) {
         weather.push(data.list[i]);
       }
-      console.log(weather);
       setWeatherData(weather);
       setTodayWeather([data.list[0], data.list[1], data.list[2], data.list[3]]);
     } catch (error) {

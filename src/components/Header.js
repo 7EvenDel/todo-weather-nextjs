@@ -177,7 +177,6 @@ const ProfileForm = () => {
 
   const onSubmit = (data) => {
     toast.success("Your account has been updated");
-    console.log(data, session.user);
   };
 
   const form = useForm({

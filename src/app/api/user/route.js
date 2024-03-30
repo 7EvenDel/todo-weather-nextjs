@@ -40,15 +40,7 @@ export async function POST(request) {
       .collection("users")
       .findOne({ email: data.email });
 
-    // await client
-    //   .db("todo-weather")
-    //   .collection("users")
-    //   .updateOne(
-    //     { email: "ovsiichuk.bohdan@gmail.com" },
-    //     { $push: { tasks: "Educational" } }
-    //   );
     if (!similarUser) {
-      // console.log(similarUser, "added");
       await client
         .db("todo-weather")
         .collection("users")
@@ -63,7 +55,6 @@ export async function POST(request) {
         });
       return new NextResponse("User data successfully sent to DB");
     } else {
-      // console.log(similarUser, "did not added");
 
       return new Response("User with this email is already exists", {
         status: 500,
@@ -73,41 +64,3 @@ export async function POST(request) {
     await client.close();
   }
 }
-
-// export async function PUT(request) {
-//   const data = await request.json();
-
-//   const client = new MongoClient(
-//     "mongodb+srv://ovsiichukbohdan:GMR5ic8rEJq63zEQ@todo-weather-db.gjm3nt1.mongodb.net/"
-//   );
-
-//   try {
-//     await client.connect();
-//     const similarUser = await client
-//       .db("todo-weather")
-//       .collection("users")
-//       .findOne({ email: data.email });
-//     if (!similarUser) {
-//       console.log(similarUser, "added");
-//       await client
-//         .db("todo-weather")
-//         .collection("users")
-//         .insertOne({
-//           ...data,
-//           language: "english",
-//           dateFormat: "ddmmyyyy",
-//           timeFormat: "24",
-//           timeZone: "eastEurope",
-//           country: "ukraine",
-//           tasks: [],
-//         });
-//       return new NextResponse("User data successfully sent to DB");
-//     } else {
-//       console.log(similarUser, "did not added");
-
-//       return new Error("User with this email is already exists");
-//     }
-//   } finally {
-//     await client.close();
-//   }
-// }
