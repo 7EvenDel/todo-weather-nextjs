@@ -45,18 +45,6 @@ const History = () => {
     }
   }, [session]);
 
-  if (session.status === "loading" || loading) {
-    return (
-      <Image
-        className="mx-auto mt-40"
-        src="/Gear-0.2s-200px.gif"
-        width={200}
-        height={200}
-        alt="Loading..."
-      />
-    );
-  }
-
   if (session.status === "unauthenticated") {
     return (
       <motion.div
@@ -76,6 +64,18 @@ const History = () => {
           ?
         </p>
       </motion.div>
+    );
+  }
+
+  if (session.status === "loading" || loading) {
+    return (
+      <Image
+        className="mx-auto mt-40"
+        src="/Gear-0.2s-200px.gif"
+        width={200}
+        height={200}
+        alt="Loading..."
+      />
     );
   }
 
