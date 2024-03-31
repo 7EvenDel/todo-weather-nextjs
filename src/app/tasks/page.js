@@ -159,7 +159,12 @@ const MyTasks = () => {
 
   if (session.status === "unauthenticated") {
     return (
-      <div className="text-center w-full mt-40">
+      <motion.div
+        className="text-center w-full mt-40"
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         <h1 className="text-2xl">Here is nothing we can show you.</h1>
         <p className="text-lg">
           May be you want to{" "}
@@ -170,7 +175,7 @@ const MyTasks = () => {
           </Link>
           ?
         </p>
-      </div>
+      </motion.div>
     );
   }
 
