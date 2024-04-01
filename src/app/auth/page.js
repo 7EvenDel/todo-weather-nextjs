@@ -67,7 +67,7 @@ const Auth = () => {
         // http://localhost:3000/api/user
         // https://todo-weather.vercel.app/api/user
 
-        const res = await fetch("https://todo-weather.vercel.app/api/user", {
+        const res = await fetch("https://todo-weth.vercel.app/api/user", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
