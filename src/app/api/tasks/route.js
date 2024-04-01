@@ -6,7 +6,7 @@ export async function GET(request) {
   try {
     const email = request.nextUrl.searchParams.get("email");
     const client = new MongoClient(
-      "mongodb+srv://ovsiichukbohdan:GMR5ic8rEJq63zEQ@todo-weather-db.gjm3nt1.mongodb.net/"
+      "mongodb+srv://arturrmartunovskyi:R7tF3vEopPt5H4b2@todo-weather.y95b0t6.mongodb.net/"
     );
     await client.connect();
 
@@ -36,7 +36,7 @@ export async function POST(request) {
   const data = await request.json();
 
   const client = new MongoClient(
-    "mongodb+srv://ovsiichukbohdan:GMR5ic8rEJq63zEQ@todo-weather-db.gjm3nt1.mongodb.net/"
+    "mongodb+srv://arturrmartunovskyi:R7tF3vEopPt5H4b2@todo-weather.y95b0t6.mongodb.net/"
   );
 
   try {
@@ -59,7 +59,7 @@ export async function PUT(request) {
   const data = await request.json();
 
   const client = new MongoClient(
-    "mongodb+srv://ovsiichukbohdan:GMR5ic8rEJq63zEQ@todo-weather-db.gjm3nt1.mongodb.net/"
+    "mongodb+srv://arturrmartunovskyi:R7tF3vEopPt5H4b2@todo-weather.y95b0t6.mongodb.net/"
   );
 
   try {
@@ -109,7 +109,7 @@ export async function DELETE(request) {
   const data = await request.json();
 
   const client = new MongoClient(
-    "mongodb+srv://ovsiichukbohdan:GMR5ic8rEJq63zEQ@todo-weather-db.gjm3nt1.mongodb.net/"
+    "mongodb+srv://arturrmartunovskyi:R7tF3vEopPt5H4b2@todo-weather.y95b0t6.mongodb.net/"
   );
 
   try {
