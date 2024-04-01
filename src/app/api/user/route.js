@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 export async function GET() {
   try {
     const client = new MongoClient(
-      "mongodb+srv://ovsiichukbohdan:GMR5ic8rEJq63zEQ@todo-weather-db.gjm3nt1.mongodb.net/"
+      "mongodb+srv://arturrmartunovskyi:R7tF3vEopPt5H4b2@todo-weather.y95b0t6.mongodb.net/"
     );
     await client.connect();
     const result = await client
@@ -30,7 +30,7 @@ export async function POST(request) {
   const data = await request.json();
 
   const client = new MongoClient(
-    "mongodb+srv://ovsiichukbohdan:GMR5ic8rEJq63zEQ@todo-weather-db.gjm3nt1.mongodb.net/"
+    "mongodb+srv://arturrmartunovskyi:R7tF3vEopPt5H4b2@todo-weather.y95b0t6.mongodb.net/"
   );
 
   try {
