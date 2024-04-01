@@ -34,7 +34,7 @@ const handler = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials.password) return null;
         const client = new MongoClient(
-          "mongodb+srv://ovsiichukbohdan:GMR5ic8rEJq63zEQ@todo-weather-db.gjm3nt1.mongodb.net/"
+          "mongodb+srv://arturrmartunovskyi:R7tF3vEopPt5H4b2@todo-weather.y95b0t6.mongodb.net/"
         );
         await client.connect();
         const currentUser = await client
