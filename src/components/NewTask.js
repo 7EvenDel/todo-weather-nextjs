@@ -129,7 +129,7 @@ const NewTaskForm = ({ getAllTasks }) => {
     toast.info("Sending...");
     try {
 
-      const res = await fetch("https://todo-weather.vercel.app/api/tasks", {
+      const res = await fetch("https://todo-weth.vercel.app//api/tasks", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
