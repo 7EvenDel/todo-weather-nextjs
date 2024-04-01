@@ -45,7 +45,7 @@ const MyTasks = () => {
       // http://localhost:3000/api/tasks
       // https://todo-weather.vercel.app/api/tasks
       const res = await fetch(
-        `https://todo-weather.vercel.app/api/tasks?email=${session.data.user.email}`
+        `https://todo-weth.vercel.app/api/tasks?email=${session.data.user.email}`
       );
       if (!res.ok) {
         throw new Error("failed to fetch");
@@ -87,7 +87,7 @@ const MyTasks = () => {
     try {
       // http://localhost:3000/api/tasks
       // https://todo-weather.vercel.app/api/tasks
-      const res = await fetch("https://todo-weather.vercel.app/api/tasks", {
+      const res = await fetch("https://todo-weth.vercel.app/api/tasks", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -113,7 +113,7 @@ const MyTasks = () => {
     try {
       // http://localhost:3000/api/user
       // https://todo-weather.vercel.app/api/user
-      const res = await fetch("https://todo-weather.vercel.app/api/user", {
+      const res = await fetch("https://todo-weth.vercel.app/api/user", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
