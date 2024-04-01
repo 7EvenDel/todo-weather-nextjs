@@ -25,7 +25,7 @@ const History = () => {
       // http://localhost:3000/api/tasks
       // https://todo-weather.vercel.app/api/tasks
       const res = await fetch(
-        `https://todo-weather.vercel.app/api/tasks?email=${session.data.user.email}`
+        `https://todo-weth.vercel.app/api/tasks?email=${session.data.user.email}`
       );
       if (!res.ok) {
         throw new Error("failed to fetch");
